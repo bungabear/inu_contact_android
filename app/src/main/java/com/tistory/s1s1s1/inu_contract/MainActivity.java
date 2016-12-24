@@ -181,10 +181,6 @@ public class MainActivity extends AppCompatActivity {
         main_rv.setAdapter(mainAdapter);
         main_rv.setItemAnimator(new DefaultItemAnimator());
         MainActivity.actionbar_tv_title.setText(R.string.app_name);
-        if(main_rv.getChildCount()==0){
-            actionbar_iv_refresh.performClick();
-            Toast.makeText(mContext, "데이터 다운로드에 실패하였습니다.", Toast.LENGTH_SHORT).show();
-        }
         rv_level = 0;
 
         bpch = new BackPressCloseHandler(this);
