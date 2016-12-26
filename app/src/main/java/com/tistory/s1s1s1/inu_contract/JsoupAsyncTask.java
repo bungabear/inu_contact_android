@@ -76,6 +76,7 @@ public class JsoupAsyncTask extends AsyncTask<Void, Void, Void> {
                 //파싱에 오류가 있음.
                 Toast.makeText(jContext, "데이터 다운로드에 실패하였습니다.\n다시 시도해주세요.", Toast.LENGTH_SHORT).show();
             } else {
+                dbHelper.delete();
                 dbHelper.insertArr(contracts);
             }
         } catch (Exception e){

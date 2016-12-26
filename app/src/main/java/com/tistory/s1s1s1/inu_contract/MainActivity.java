@@ -255,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
                             .setPositiveButton("예", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    JsoupAsyncTask_refresh jsoupAsyncTask = new JsoupAsyncTask_refresh(MainActivity.this);
+                                    JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
                                     jsoupAsyncTask.execute();
 
                                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -307,8 +307,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                     break;
                 case R.id.actionbar_iv_info:
-                    Intent intent = new Intent(MainActivity.this, InfoActivity.class);
-                    startActivity(intent);
+//                    Intent intent = new Intent(MainActivity.this, InfoActivity.class);
+//                    startActivity(intent);
                     break;
             }
         }
