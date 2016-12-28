@@ -64,12 +64,13 @@ public class DBHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public int getCount(){
+    public int getDBCount(){
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM CONTRACT", null);
+        int cnt = cursor.getCount();
         db.close();
         if(cursor==null) return 0;
-        else return cursor.getColumnCount();
+        else return cnt;
     }
 
     public ArrayList<Contract> getResult(){

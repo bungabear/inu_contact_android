@@ -7,6 +7,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
@@ -96,94 +98,8 @@ public class MainActivity extends AppCompatActivity {
 
         dbHelper = new DBHelper(getApplicationContext(), "contract.db", null, 1);
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-        if (!prefs.contains("isfirst")) {
-            editor.putBoolean("isfirst", true);
-            Date date = new Date();
-            String today = sdf.format(date);
-            editor.putString("lastupdate", today);
-            editor.commit();
-        } else {
-            Date today = new Date();
-            String lastupdate = prefs.getString("lastupdate", "2016-01-01");
-            Date lastupdate2 = new Date();
-            try {
-                lastupdate2 = sdf.parse(lastupdate);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            long between = ((today.getTime() - lastupdate2.getTime()) / 1000) / (60 * 60 * 24);
-            if (between >= 30) {
-//                Toast.makeText(mContext, "30일이 지났습니다. 업데이트 하시겠습니까?", Toast.LENGTH_SHORT).show();
-                AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.mContext2);
-                dialog.setTitle("데이터 업데이트").setMessage("데이터 업데이트가 있습니다. 진행하시겠습니까?").setIcon(R.drawable.ic_refresh_pc)
-                        .setPositiveButton("예", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                JsoupAsyncTask_refresh jsoupAsyncTask = new JsoupAsyncTask_refresh(MainActivity.this);
-                                jsoupAsyncTask.execute();
-                            }
-                        }).setNegativeButton("아니오", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                AlertDialog alert = dialog.create();
-                alert.show();
-                Button nbutton = alert.getButton(DialogInterface.BUTTON_NEGATIVE);
-                nbutton.setTextColor(Color.BLACK);
-                Button pbutton = alert.getButton(DialogInterface.BUTTON_POSITIVE);
-                pbutton.setTextColor(Color.BLACK);
-
-                Date date = new Date();
-                String todayy = sdf.format(date);
-                editor.putString("lastupdate", todayy);
-                editor.commit();
-            }
-        }
-
-
-
         main_rv = (RecyclerView) findViewById(R.id.main_rv);
         main_rv.setLayoutManager(new LinearLayoutManager(this));
-
-
-//        isfirst = true;
-
-//        DBHelper dbHelper = new DBHelper(getApplicationContext(), "contract.db", null, 1);
-//        dbHelper.drop();
-
-        if (prefs.getBoolean("isfirst", true) == true) {
-            JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
-            jsoupAsyncTask.execute();
-            editor.putBoolean("isfirst", false);
-            editor.commit();
-//            updatedate = new Date();
-        } else {
-
-        }
-
-//        if(Build.VERSION.SDK_INT > 22) {
-//            main_rv.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-//                @Override
-//                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-//                    if (MainActivity.actionbar_et_search.isFocused()) {
-//                        MainActivity.actionbar_et_search.clearFocus();
-//                    }
-//                }
-//            });
-//        }
-
-        ArrayList<String> parts = dbHelper.getPart();
-        MainAdapter mainAdapter = new MainAdapter(getApplication(), parts);
-        main_rv.setAdapter(mainAdapter);
-        main_rv.setItemAnimator(new DefaultItemAnimator());
-        MainActivity.actionbar_tv_title.setText(R.string.app_name);
-        rv_level = 0;
-
-        bpch = new BackPressCloseHandler(this);
 
         PermissionListener permissionListener = new PermissionListener() {
             @Override
@@ -197,12 +113,51 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        new TedPermission(mContext)
-                .setPermissionListener(permissionListener)
+        bpch = new BackPressCloseHandler(this);
+
+        if(dbHelper.getDBCount()==0){
+            if(networkCheck()==false){
+                AlertDialog dialog = new AlertDialog.Builder(this).create();
+                dialog.setMessage(getString(R.string.no_internet));
+                dialog.setButton(AlertDialog.BUTTON_POSITIVE, "확인", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        finish();
+                    }
+                });
+                dialog.setCancelable(false);
+                dialog.show();
+                Button pbutton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                pbutton.setTextColor(Color.BLACK);
+            } else {
+                new TedPermission(mContext)
+                        .setPermissionListener(permissionListener)
 //                .setRationaleMessage("앱에서 바로 통화 발신을 위해서는 권한이 필요합니다.")
 //                .setDeniedMessage("만일 권한 요청을 거부할 경우, 앱에서 바로 통화 발신이 불가합니다.\n\n[설정] > [권한]에서 권한을 허용해주세요.")
-                .setPermissions(android.Manifest.permission.CALL_PHONE).check();
+                        .setPermissions(android.Manifest.permission.CALL_PHONE).check();
 
+                JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
+                jsoupAsyncTask.execute();
+            }
+        } else {
+            //db가 이미 있을 경우
+            new TedPermission(mContext)
+                    .setPermissionListener(permissionListener)
+//                .setRationaleMessage("앱에서 바로 통화 발신을 위해서는 권한이 필요합니다.")
+//                .setDeniedMessage("만일 권한 요청을 거부할 경우, 앱에서 바로 통화 발신이 불가합니다.\n\n[설정] > [권한]에서 권한을 허용해주세요.")
+                    .setPermissions(android.Manifest.permission.CALL_PHONE).check();
+
+            if(networkCheck()==true) {
+                updateCheck();
+            }
+
+            ArrayList<String> parts = dbHelper.getPart();
+            MainAdapter mainAdapter = new MainAdapter(getApplication(), parts);
+            main_rv.setAdapter(mainAdapter);
+            main_rv.setItemAnimator(new DefaultItemAnimator());
+            MainActivity.actionbar_tv_title.setText(R.string.app_name);
+            rv_level = 0;
+        }
     }
 
     @Override
@@ -250,32 +205,48 @@ public class MainActivity extends AppCompatActivity {
 
             switch (id) {
                 case R.id.actionbar_iv_refresh:
-                    AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
-                    dialog.setTitle("새로고침").setMessage("데이터를 새로고침 하시겠습니까?\n(데이터는 한 달 주기로 자동으로 업데이트됩니다.)").setIcon(R.drawable.ic_refresh_pc)
-                            .setPositiveButton("예", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
-                                    jsoupAsyncTask.execute();
+                    final AlertDialog dialog = new AlertDialog.Builder(v.getContext()).create();
+                    if(networkCheck()==true) {
+                        dialog.setTitle("새로고침");
+                        dialog.setMessage("데이터를 새로고침 하시겠습니까?\n(데이터는 한 달 주기로 자동으로 업데이트됩니다.)");
+                        dialog.setIcon(R.drawable.ic_refresh_pc);
+                        dialog.setButton(AlertDialog.BUTTON_POSITIVE, "예", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
+                                jsoupAsyncTask.execute();
 
-                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                                    Date date = new Date();
-                                    String today = sdf.format(date);
-                                    editor.putString("lastupdate", today);
-                                    editor.commit();
-                                }
-                            }).setNegativeButton("아니오", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                    AlertDialog alert = dialog.create();
-                    alert.show();
-                    Button nbutton = alert.getButton(DialogInterface.BUTTON_NEGATIVE);
-                    nbutton.setTextColor(Color.BLACK);
-                    Button pbutton = alert.getButton(DialogInterface.BUTTON_POSITIVE);
-                    pbutton.setTextColor(Color.BLACK);
+                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                                Date date = new Date();
+                                String today = sdf.format(date);
+                                editor.putString("lastupdate", today);
+                                editor.commit();
+                            }
+                        });
+                        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "아니오", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialog.dismiss();
+                            }
+                        });
+                        dialog.show();
+                        Button nbutton = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+                        nbutton.setTextColor(Color.BLACK);
+                        Button pbutton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                        pbutton.setTextColor(Color.BLACK);
+                    } else {
+                        dialog.setMessage(getString(R.string.no_internet));
+                        dialog.setButton(AlertDialog.BUTTON_POSITIVE, "확인", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialog.dismiss();
+                            }
+                        });
+                        dialog.setCancelable(false);
+                        dialog.show();
+                        Button pbutton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                        pbutton.setTextColor(Color.BLACK);
+                    }
                     break;
                 case R.id.actionbar_iv_search:
                     if(rv_level==0) {
@@ -313,4 +284,71 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+
+    public void updateCheck(){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        if(!prefs.contains("lastupdate")) {
+            Date date = new Date();
+            String sdate = sdf.format(date);
+            editor.putString("lastupdate", sdate);
+            editor.commit();
+        }
+
+        Date today = new Date();
+        String lastupdate = prefs.getString("lastupdate", "2016-01-01");
+        Date lastupdate2 = new Date();
+        try {
+            lastupdate2 = sdf.parse(lastupdate);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        long between = ((today.getTime() - lastupdate2.getTime()) / 1000) / (60 * 60 * 24);
+        if (between >= 30) {
+            //한 달 간격으로 자동 업데이트.
+//                Toast.makeText(mContext, "30일이 지났습니다. 업데이트 하시겠습니까?", Toast.LENGTH_SHORT).show();
+            AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.mContext2);
+            dialog.setTitle("데이터 업데이트").setMessage("데이터 업데이트가 있습니다. 진행하시겠습니까?\n(아니오를 선택한 경우 수동으로 업데이트 해주세요.)").setIcon(R.drawable.ic_refresh_pc)
+                    .setPositiveButton("예", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
+                            jsoupAsyncTask.execute();
+                        }
+                    }).setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            AlertDialog alert = dialog.create();
+            alert.show();
+            Button nbutton = alert.getButton(DialogInterface.BUTTON_NEGATIVE);
+            nbutton.setTextColor(Color.BLACK);
+            Button pbutton = alert.getButton(DialogInterface.BUTTON_POSITIVE);
+            pbutton.setTextColor(Color.BLACK);
+
+            Date date = new Date();
+            String todayy = sdf.format(date);
+            editor.putString("lastupdate", todayy);
+            editor.commit();
+        }
+//        else {
+//            JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
+//            jsoupAsyncTask.execute();
+//        }
+    }
+
+    public Boolean networkCheck() {
+        ConnectivityManager manager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo phone = manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        NetworkInfo wifi = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+        if (phone.isConnected() || wifi.isConnected()) { //무선 데이터 네트워크 또는 Wifi연결이 되어있는 상태
+            return true;
+        } else { //연결되어 있지 않음
+            return false;
+        }
+
+    }
 }
