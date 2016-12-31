@@ -278,8 +278,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                     break;
                 case R.id.actionbar_iv_info:
-//                    Intent intent = new Intent(MainActivity.this, InfoActivity.class);
-//                    startActivity(intent);
+                    Intent intent = new Intent(MainActivity.this, InfoActivity.class);
+                    startActivity(intent);
                     break;
             }
         }

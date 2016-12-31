@@ -61,7 +61,8 @@
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:lines="1"
-            android:id="@+id/actionbar_et_search"/>
+            android:id="@+id/actionbar_et_search"
+            android:textSize="12dp"/>
 
 
         <ImageView

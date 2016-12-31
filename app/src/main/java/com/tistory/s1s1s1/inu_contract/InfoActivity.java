@@ -1,6 +1,7 @@
 package com.tistory.s1s1s1.inu_contract;
 
 import android.content.pm.PackageInfo;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
@@ -25,6 +26,9 @@ public class InfoActivity extends AppCompatActivity {
         } catch (Exception e){
             e.printStackTrace();
         }
-        tv_ver.setText("버전 "+pi.versionName);
+        tv_ver.setText(pi.versionName);
+
+        Typeface tf = Typeface.createFromAsset(getAssets(), "NanumGothicBold.ttf");
+        tv_ver.setTypeface(tf);
     }
 }
