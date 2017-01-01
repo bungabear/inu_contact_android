@@ -74,14 +74,14 @@ public class JsoupAsyncTask extends AsyncTask<Void, Void, Void> {
             }
             if(contacts.size()<=500){
                 //파싱에 오류가 있음.
-                Toast.makeText(jContext, "데이터 다운로드에 실패하였습니다.\n다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(jContext, "데이터 다운로드에 실패하였습니다.\n다시 시도해주세요.", Toast.LENGTH_SHORT).show();
             } else {
                 dbHelper.delete();
                 dbHelper.insertArr(contacts);
             }
         } catch (Exception e){
             e.printStackTrace();
-            Toast.makeText(jContext, "데이터 다운로드에 실패하였습니다.\n다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(jContext, "데이터 다운로드에 실패하였습니다.\n다시 시도해주세요.", Toast.LENGTH_SHORT).show();
         }
 
         return null;
@@ -120,6 +120,10 @@ public class JsoupAsyncTask extends AsyncTask<Void, Void, Void> {
         MainActivity.rv_level=0;
         if(MainActivity.actionbar_et_search.isFocused()){
             MainActivity.actionbar_et_search.clearFocus();
+        }
+        
+        if(mainAdapter.getItemCount()==0){
+            Toast.makeText(jContext, "데이터 다운로드에 실패하였습니다.\n새로고침을 눌러 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
         }
 
         progressDialog.dismiss();
