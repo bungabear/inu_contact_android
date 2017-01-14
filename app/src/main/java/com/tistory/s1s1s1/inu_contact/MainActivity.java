@@ -112,49 +112,77 @@ public class MainActivity extends AppCompatActivity {
 
         bpch = new BackPressCloseHandler(this);
 
-        if(dbHelper.getDBCount()==0){
-            if(networkCheck()==false){
-                AlertDialog dialog = new AlertDialog.Builder(this).create();
-                dialog.setMessage(getString(R.string.no_internet));
-                dialog.setButton(AlertDialog.BUTTON_POSITIVE, "확인", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        finish();
-                    }
-                });
-                dialog.setCancelable(false);
-                dialog.show();
-                Button pbutton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-                pbutton.setTextColor(Color.BLACK);
-            } else {
-                new TedPermission(mContext)
-                        .setPermissionListener(permissionListener)
-//                .setRationaleMessage("앱에서 바로 통화 발신을 위해서는 권한이 필요합니다.")
-//                .setDeniedMessage("만일 권한 요청을 거부할 경우, 앱에서 바로 통화 발신이 불가합니다.\n\n[설정] > [권한]에서 권한을 허용해주세요.")
-                        .setPermissions(android.Manifest.permission.CALL_PHONE).check();
-
-                JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
-                jsoupAsyncTask.execute();
-            }
+        if(networkCheck()==false){
+            AlertDialog dialog = new AlertDialog.Builder(this).create();
+            dialog.setMessage(getString(R.string.no_internet));
+            dialog.setButton(AlertDialog.BUTTON_POSITIVE, "확인", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    finish();
+                }
+            });
+            dialog.setCancelable(false);
+            dialog.show();
+            Button pbutton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+            pbutton.setTextColor(Color.BLACK);
         } else {
-            //db가 이미 있을 경우
             new TedPermission(mContext)
                     .setPermissionListener(permissionListener)
 //                .setRationaleMessage("앱에서 바로 통화 발신을 위해서는 권한이 필요합니다.")
 //                .setDeniedMessage("만일 권한 요청을 거부할 경우, 앱에서 바로 통화 발신이 불가합니다.\n\n[설정] > [권한]에서 권한을 허용해주세요.")
                     .setPermissions(android.Manifest.permission.CALL_PHONE).check();
 
-            if(networkCheck()==true) {
-                updateCheck();
-            }
-
-            ArrayList<String> parts = dbHelper.getPart();
-            MainAdapter mainAdapter = new MainAdapter(getApplication(), parts);
-            main_rv.setAdapter(mainAdapter);
-            main_rv.setItemAnimator(new DefaultItemAnimator());
-            MainActivity.actionbar_tv_title.setText(R.string.app_name);
-            rv_level = 0;
+            JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
+            jsoupAsyncTask.execute();
         }
+//
+//        if(dbHelper.getDBCount()==0){
+//            if(networkCheck()==false){
+//                AlertDialog dialog = new AlertDialog.Builder(this).create();
+//                dialog.setMessage(getString(R.string.no_internet));
+//                dialog.setButton(AlertDialog.BUTTON_POSITIVE, "확인", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int i) {
+//                        finish();
+//                    }
+//                });
+//                dialog.setCancelable(false);
+//                dialog.show();
+//                Button pbutton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+//                pbutton.setTextColor(Color.BLACK);
+//            } else {
+//                new TedPermission(mContext)
+//                        .setPermissionListener(permissionListener)
+////                .setRationaleMessage("앱에서 바로 통화 발신을 위해서는 권한이 필요합니다.")
+////                .setDeniedMessage("만일 권한 요청을 거부할 경우, 앱에서 바로 통화 발신이 불가합니다.\n\n[설정] > [권한]에서 권한을 허용해주세요.")
+//                        .setPermissions(android.Manifest.permission.CALL_PHONE).check();
+//
+//                JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
+//                jsoupAsyncTask.execute();
+//            }
+//        } else {
+//            //db가 이미 있을 경우
+//            new TedPermission(mContext)
+//                    .setPermissionListener(permissionListener)
+////                .setRationaleMessage("앱에서 바로 통화 발신을 위해서는 권한이 필요합니다.")
+////                .setDeniedMessage("만일 권한 요청을 거부할 경우, 앱에서 바로 통화 발신이 불가합니다.\n\n[설정] > [권한]에서 권한을 허용해주세요.")
+//                    .setPermissions(android.Manifest.permission.CALL_PHONE).check();
+//
+//            if(networkCheck()==true) {
+//                updateCheck();
+//            }
+//
+//            dbHelper.delete();
+//            JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
+//            jsoupAsyncTask.execute();
+//
+////            ArrayList<String> parts = dbHelper.getPart();
+////            MainAdapter mainAdapter = new MainAdapter(getApplication(), parts);
+////            main_rv.setAdapter(mainAdapter);
+////            main_rv.setItemAnimator(new DefaultItemAnimator());
+////            MainActivity.actionbar_tv_title.setText(R.string.app_name);
+////            rv_level = 0;
+//        }
     }
 
     @Override
@@ -205,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
                     final AlertDialog dialog = new AlertDialog.Builder(v.getContext()).create();
                     if(networkCheck()==true) {
                         dialog.setTitle("새로고침");
-                        dialog.setMessage("데이터를 새로고침 하시겠습니까?\n(데이터는 한 달 주기로 자동으로 업데이트됩니다.)");
+                        dialog.setMessage("데이터를 새로고침 하시겠습니까?\n");
                         dialog.setIcon(R.drawable.ic_refresh_pc);
                         dialog.setButton(AlertDialog.BUTTON_POSITIVE, "예", new DialogInterface.OnClickListener() {
                             @Override

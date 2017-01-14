@@ -41,7 +41,7 @@ public class JsoupAsyncTask extends AsyncTask<Void, Void, Void> {
 
         if(progressDialog==null) {
             progressDialog = new ProgressDialog(jContext);
-            progressDialog.setMessage("서버에서 데이터를 받아오는 중입니다.");
+            progressDialog.setMessage("데이터를 불러오는 중입니다...");
             progressDialog.setIndeterminate(false);
             progressDialog.setCanceledOnTouchOutside(false);
             progressDialog.show();
