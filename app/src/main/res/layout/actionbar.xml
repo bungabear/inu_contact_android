@@ -63,7 +63,10 @@
             android:hint="소속 또는 이름을 입력하세요."
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
+            android:maxLines="1"
+            android:imeOptions="actionSearch"
             android:lines="1"
+            android:singleLine="true"
             android:id="@+id/actionbar_et_search"
             android:textSize="12dp"/>
 

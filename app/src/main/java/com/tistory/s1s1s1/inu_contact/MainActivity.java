@@ -17,11 +17,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
@@ -75,10 +77,11 @@ public class MainActivity extends AppCompatActivity {
         actionbar_iv_refresh = (ImageView) findViewById(R.id.actionbar_iv_refresh);
         actionbar_iv_refresh.setOnClickListener(mClickListener);
         actionbar_et_search = (EditText) findViewById(R.id.actionbar_et_search);
-        actionbar_et_search.setOnKeyListener(new View.OnKeyListener() {
+        actionbar_et_search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if(keyCode==event.KEYCODE_ENTER){
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                if(i == EditorInfo.IME_ACTION_SEARCH){
+                    actionbar_iv_search.performClick();
                     return true;
                 }
                 return false;
@@ -274,35 +277,39 @@ public class MainActivity extends AppCompatActivity {
                     }
                     break;
                 case R.id.actionbar_iv_search:
-                    if(rv_level==0) {
-                        String keyword = actionbar_et_search.getText().toString();
-                        issearch = true;
-                        main_rv.removeAllViews();
-                        ArrayList<Contact> parts = dbHelper.searchP2(keyword);
-                        ArrayList<Contact> contacts = dbHelper.searchC(keyword);
+                    if(actionbar_et_search.getText().length()==0){
+                        Toast.makeText(MainActivity.this, "검색어를 입력해주세요.", Toast.LENGTH_SHORT).show();
+                    }else {
+                        if (rv_level == 0) {
+                            String keyword = actionbar_et_search.getText().toString();
+                            issearch = true;
+                            main_rv.removeAllViews();
+                            ArrayList<Contact> parts = dbHelper.searchP2(keyword);
+                            ArrayList<Contact> contacts = dbHelper.searchC(keyword);
 
-                        parts.addAll(contacts);
+                            parts.addAll(contacts);
 
-                        ContactAdapter contactAdapter = new ContactAdapter(getApplication(), parts);
-                        main_rv.setItemAnimator(new DefaultItemAnimator());
-                        main_rv.setAdapter(contactAdapter);
-                        MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
-                        MainActivity.actionbar_tv_title.setText("검색");
-                    } else {
-                        String keyword = actionbar_et_search.getText().toString();
-                        issearch = true;
-                        main_rv.removeAllViews();
-                        String part = actionbar_tv_title.getText().toString();
-                        ArrayList<Contact> contacts = dbHelper.searchC(keyword, part);
+                            ContactAdapter contactAdapter = new ContactAdapter(getApplication(), parts);
+                            main_rv.setItemAnimator(new DefaultItemAnimator());
+                            main_rv.setAdapter(contactAdapter);
+                            MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
+                            MainActivity.actionbar_tv_title.setText("검색");
+                        } else {
+                            String keyword = actionbar_et_search.getText().toString();
+                            issearch = true;
+                            main_rv.removeAllViews();
+                            String part = actionbar_tv_title.getText().toString();
+                            ArrayList<Contact> contacts = dbHelper.searchC(keyword, part);
 
-                        ContactAdapter contactAdapter = new ContactAdapter(getApplication(), contacts);
-                        main_rv.setItemAnimator(new DefaultItemAnimator());
-                        main_rv.setAdapter(contactAdapter);
-                        MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
-                        if(part.length()>=9){
-                            part = part.substring(0, 8)+"...";
+                            ContactAdapter contactAdapter = new ContactAdapter(getApplication(), contacts);
+                            main_rv.setItemAnimator(new DefaultItemAnimator());
+                            main_rv.setAdapter(contactAdapter);
+                            MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
+                            if (part.length() >= 9) {
+                                part = part.substring(0, 8) + "...";
+                            }
+                            actionbar_tv_title.setText(part + " - 검색");
                         }
-                        actionbar_tv_title.setText(part+" - 검색");
                     }
                     break;
                 case R.id.actionbar_iv_info:
