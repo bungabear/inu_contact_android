@@ -106,6 +106,20 @@ public class DBHelper extends SQLiteOpenHelper {
         return parts;
     }
 
+    public ArrayList<Contact> getPartC(){
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT DISTINCT PART FROM CONTACT ORDER BY PART ASC", null);
+        ArrayList<Contact> parts = new ArrayList<>();
+        Contact contact;
+        while(cursor.moveToNext()){
+            contact = new Contact();
+            contact.setPart(cursor.getString(0));
+            parts.add(contact);
+        }
+        db.close();
+        return parts;
+    }
+
     public ArrayList<Contact> getContact(String part){
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM CONTACT WHERE PART='"+part+"'", null);
@@ -149,6 +163,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public ArrayList<Contact> searchC(String c, String part){
+        //부서 내부에서 검색할때
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM CONTACT WHERE PART='"+part+"' AND NAME LIKE'%"+c+"%'", null);
         ArrayList<Contact> contacts = new ArrayList<>();

@@ -15,6 +15,8 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -71,6 +73,9 @@ public class MainActivity extends AppCompatActivity {
         mContext = getApplication();
         mContext2 = MainActivity.this;
 
+
+
+
         actionbar_tv_title = (TextView) findViewById(R.id.actionbar_tv_title);
         Typeface tf = Typeface.createFromAsset(getAssets(), "NanumGothicBold.ttf");
         actionbar_tv_title.setTypeface(tf);
@@ -81,12 +86,61 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
                 if(i == EditorInfo.IME_ACTION_SEARCH){
-                    actionbar_iv_search.performClick();
+//                    actionbar_iv_search.performClick();
+                    InputMethodManager imm = (InputMethodManager)mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(MainActivity.actionbar_et_search.getWindowToken(), 0);
                     return true;
                 }
                 return false;
             }
         });
+
+        actionbar_et_search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String keyword = actionbar_et_search.getText().toString();
+                if(!keyword.equals("")) {
+                    issearch = true;
+                    if (rv_level == 0) {
+                        main_rv.removeAllViews();
+                        ArrayList<Contact> parts = dbHelper.searchP2(keyword);
+                        ArrayList<Contact> contacts = dbHelper.searchC(keyword);
+
+                        parts.addAll(contacts);
+
+                        ContactAdapter contactAdapter = new ContactAdapter(getApplication(), parts);
+                        main_rv.setItemAnimator(new DefaultItemAnimator());
+                        main_rv.setAdapter(contactAdapter);
+                        MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
+//                    MainActivity.actionbar_tv_title.setText("검색");
+                    } else {
+                        main_rv.removeAllViews();
+                        String part = actionbar_tv_title.getText().toString();
+                        ArrayList<Contact> contacts = dbHelper.searchC(keyword, part);
+
+                        ContactAdapter contactAdapter = new ContactAdapter(getApplication(), contacts);
+                        main_rv.setItemAnimator(new DefaultItemAnimator());
+                        main_rv.setAdapter(contactAdapter);
+                        MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
+                        if (part.length() >= 9) {
+                            part = part.substring(0, 8) + "...";
+                        }
+//                    actionbar_tv_title.setText(part + " - 검색");
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
         actionbar_iv_search = (ImageView) findViewById(R.id.actionbar_iv_search);
         actionbar_iv_search.setOnClickListener(mClickListener);
         actionbar_iv_info = (ImageView) findViewById(R.id.actionbar_iv_info);
@@ -135,8 +189,32 @@ public class MainActivity extends AppCompatActivity {
 //                .setDeniedMessage("만일 권한 요청을 거부할 경우, 앱에서 바로 통화 발신이 불가합니다.\n\n[설정] > [권한]에서 권한을 허용해주세요.")
                     .setPermissions(android.Manifest.permission.CALL_PHONE).check();
 
-            JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
-            jsoupAsyncTask.execute();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            if(!prefs.contains("lastupdate")) {
+                Date date = new Date();
+                String sdate = sdf.format(date);
+                editor.putString("lastupdate", sdate);
+                editor.commit();
+                JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
+                jsoupAsyncTask.execute();
+            } else {
+                Date date = new Date();
+                String sdate = sdf.format(date);
+                if (!prefs.getString("lastupdate", null).equals(sdate)) {
+                    JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
+                    jsoupAsyncTask.execute();
+                } else {
+//                    ArrayList<String> parts = dbHelper.getPart();
+                    ArrayList<Contact> parts = dbHelper.getPartC();
+//                    MainAdapter mainAdapter = new MainAdapter(getApplication(), parts);
+                    ContactAdapter contactAdapter = new ContactAdapter(getApplication(), parts);
+//                    main_rv.setAdapter(mainAdapter);
+                    main_rv.setAdapter(contactAdapter);
+                    main_rv.setItemAnimator(new DefaultItemAnimator());
+                    MainActivity.actionbar_tv_title.setText(R.string.app_name);
+                    rv_level = 0;
+                }
+            }
         }
 //
 //        if(dbHelper.getDBCount()==0){
@@ -191,9 +269,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if(issearch==true){
-            ArrayList<String> parts = dbHelper.getPart();
-            MainAdapter mainAdapter = new MainAdapter(mContext, parts);
-            MainActivity.main_rv.setAdapter(mainAdapter);
+//            ArrayList<String> parts = dbHelper.getPart();
+//            MainAdapter mainAdapter = new MainAdapter(mContext, parts);
+//            MainActivity.main_rv.setAdapter(mainAdapter);
+            ArrayList<Contact> contacts = dbHelper.getPartC();
+            ContactAdapter contactAdapter = new ContactAdapter(mContext, contacts);
+            MainActivity.main_rv.setAdapter(contactAdapter);
             MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
             MainActivity.actionbar_tv_title.setText(R.string.app_name);
             MainActivity.rv_level=0;
@@ -203,10 +284,13 @@ public class MainActivity extends AppCompatActivity {
             MainActivity.actionbar_et_search.setText("");
             issearch=false;
         } else if (MainActivity.rv_level == 1) {
-            ArrayList<String> parts = dbHelper.getPart();
-            MainAdapter mainAdapter = new MainAdapter(getApplication(), parts);
+//            ArrayList<String> parts = dbHelper.getPart();
+//            MainAdapter mainAdapter = new MainAdapter(getApplication(), parts);
             MainActivity.main_rv.removeAllViews();
-            MainActivity.main_rv.setAdapter(mainAdapter);
+//            MainActivity.main_rv.setAdapter(mainAdapter);
+            ArrayList<Contact> contacts = dbHelper.getPartC();
+            ContactAdapter contactAdapter = new ContactAdapter(mContext, contacts);
+            MainActivity.main_rv.setAdapter(contactAdapter);
             MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
             MainActivity.actionbar_tv_title.setText(R.string.app_name);
             MainActivity.rv_level = 0;
@@ -244,11 +328,11 @@ public class MainActivity extends AppCompatActivity {
                                 JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
                                 jsoupAsyncTask.execute();
 
-                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                                Date date = new Date();
-                                String today = sdf.format(date);
-                                editor.putString("lastupdate", today);
-                                editor.commit();
+//                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//                                Date date = new Date();
+//                                String today = sdf.format(date);
+//                                editor.putString("lastupdate", today);
+//                                editor.commit();
                             }
                         });
                         dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "아니오", new DialogInterface.OnClickListener() {
@@ -276,42 +360,42 @@ public class MainActivity extends AppCompatActivity {
                         pbutton.setTextColor(Color.BLACK);
                     }
                     break;
-                case R.id.actionbar_iv_search:
-                    if(actionbar_et_search.getText().length()==0){
-                        Toast.makeText(MainActivity.this, "검색어를 입력해주세요.", Toast.LENGTH_SHORT).show();
-                    }else {
-                        if (rv_level == 0) {
-                            String keyword = actionbar_et_search.getText().toString();
-                            issearch = true;
-                            main_rv.removeAllViews();
-                            ArrayList<Contact> parts = dbHelper.searchP2(keyword);
-                            ArrayList<Contact> contacts = dbHelper.searchC(keyword);
-
-                            parts.addAll(contacts);
-
-                            ContactAdapter contactAdapter = new ContactAdapter(getApplication(), parts);
-                            main_rv.setItemAnimator(new DefaultItemAnimator());
-                            main_rv.setAdapter(contactAdapter);
-                            MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
-                            MainActivity.actionbar_tv_title.setText("검색");
-                        } else {
-                            String keyword = actionbar_et_search.getText().toString();
-                            issearch = true;
-                            main_rv.removeAllViews();
-                            String part = actionbar_tv_title.getText().toString();
-                            ArrayList<Contact> contacts = dbHelper.searchC(keyword, part);
-
-                            ContactAdapter contactAdapter = new ContactAdapter(getApplication(), contacts);
-                            main_rv.setItemAnimator(new DefaultItemAnimator());
-                            main_rv.setAdapter(contactAdapter);
-                            MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
-                            if (part.length() >= 9) {
-                                part = part.substring(0, 8) + "...";
-                            }
-                            actionbar_tv_title.setText(part + " - 검색");
-                        }
-                    }
-                    break;
+//                case R.id.actionbar_iv_search:
+//                    if(actionbar_et_search.getText().length()==0){
+//                        Toast.makeText(MainActivity.this, "검색어를 입력해주세요.", Toast.LENGTH_SHORT).show();
+//                    }else {
+//                        if (rv_level == 0) {
+//                            String keyword = actionbar_et_search.getText().toString();
+//                            issearch = true;
+//                            main_rv.removeAllViews();
+//                            ArrayList<Contact> parts = dbHelper.searchP2(keyword);
+//                            ArrayList<Contact> contacts = dbHelper.searchC(keyword);
+//
+//                            parts.addAll(contacts);
+//
+//                            ContactAdapter contactAdapter = new ContactAdapter(getApplication(), parts);
+//                            main_rv.setItemAnimator(new DefaultItemAnimator());
+//                            main_rv.setAdapter(contactAdapter);
+//                            MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
+////                            MainActivity.actionbar_tv_title.setText("검색");
+//                        } else {
+//                            String keyword = actionbar_et_search.getText().toString();
+//                            issearch = true;
+//                            main_rv.removeAllViews();
+//                            String part = actionbar_tv_title.getText().toString();
+//                            ArrayList<Contact> contacts = dbHelper.searchC(keyword, part);
+//
+//                            ContactAdapter contactAdapter = new ContactAdapter(getApplication(), contacts);
+//                            main_rv.setItemAnimator(new DefaultItemAnimator());
+//                            main_rv.setAdapter(contactAdapter);
+//                            MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
+//                            if (part.length() >= 9) {
+//                                part = part.substring(0, 8) + "...";
+//                            }
+////                            actionbar_tv_title.setText(part + " - 검색");
+//                        }
+//                    }
+//                    break;
                 case R.id.actionbar_iv_info:
                     Intent intent = new Intent(MainActivity.this, InfoActivity.class);
                     startActivity(intent);

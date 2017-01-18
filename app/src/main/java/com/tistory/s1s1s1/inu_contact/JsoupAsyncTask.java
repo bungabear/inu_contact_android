@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.widget.Toast;
 
+import com.tistory.s1s1s1.inu_contact.RecyclerView.ContactAdapter;
 import com.tistory.s1s1s1.inu_contact.RecyclerView.MainAdapter;
 import com.tistory.s1s1s1.inu_contact.R;
 
@@ -112,9 +113,14 @@ public class JsoupAsyncTask extends AsyncTask<Void, Void, Void> {
 //            test+=part+"\n";
 //        }
 
-        ArrayList<String> parts = dbHelper.getPart();
-        MainAdapter mainAdapter = new MainAdapter(jContext, parts);
-        MainActivity.main_rv.setAdapter(mainAdapter);
+//        ArrayList<String> parts = dbHelper.getPart();
+//        MainAdapter mainAdapter = new MainAdapter(jContext, parts);
+//        MainActivity.main_rv.setAdapter(mainAdapter);
+//
+        ArrayList<Contact> contacts = dbHelper.getPartC();
+        ContactAdapter contactAdapter = new ContactAdapter(jContext, contacts);
+        MainActivity.main_rv.setAdapter(contactAdapter);
+
         MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
         MainActivity.actionbar_tv_title.setText(R.string.app_name);
         MainActivity.rv_level=0;
@@ -122,7 +128,7 @@ public class JsoupAsyncTask extends AsyncTask<Void, Void, Void> {
             MainActivity.actionbar_et_search.clearFocus();
         }
         
-        if(mainAdapter.getItemCount()==0){
+        if(contactAdapter.getItemCount()==0){
             Toast.makeText(jContext, "데이터 다운로드에 실패하였습니다.\n새로고침을 눌러 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
         }
 

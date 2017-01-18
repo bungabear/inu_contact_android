@@ -42,7 +42,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
 
     @Override
     public ContactAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View itemLayoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.contact_item, null);
+        View itemLayoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.contact_item_new, null);
         ContactAdapter.ViewHolder viewHolder = new ContactAdapter.ViewHolder(itemLayoutView);
         return viewHolder;
     }
@@ -51,10 +51,11 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         final Contact Contact = Contacts.get(position);
         if(Contact.getDpart().equals("") && Contact.getName().equals("")){
-            holder.contact_item_tv_dpart.setVisibility(View.INVISIBLE);
+            //부서
+            holder.contact_item_tv_dpart.setVisibility(View.GONE);
             holder.contact_item_tv_name.setText(Contact.getPart());
-            holder.contact_item_tv_number.setVisibility(View.INVISIBLE);
-            holder.contact_item_tv_email.setVisibility(View.INVISIBLE);
+            holder.contact_item_tv_number.setVisibility(View.GONE);
+//            holder.contact_item_tv_email.setVisibility(View.INVISIBLE);
             holder.contact_item_iv_call.setVisibility(GONE);
             holder.contact_item_rl.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -82,17 +83,18 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
                 }
             });
         } else {
+            //사람
             holder.contact_item_tv_dpart.setVisibility(View.VISIBLE);
             holder.contact_item_tv_number.setVisibility(View.VISIBLE);
-            holder.contact_item_tv_email.setVisibility(View.VISIBLE);
+//            holder.contact_item_tv_email.setVisibility(View.VISIBLE);
             holder.contact_item_iv_call.setVisibility(View.VISIBLE);
             holder.contact_item_tv_dpart.setText(Contact.getDpart() + " / " + Contact.getPosition());
             holder.contact_item_tv_name.setText(Contact.getName());
             holder.contact_item_tv_number.setText(Contact.getPhone());
-            holder.contact_item_tv_email.setText(Contact.getEmail());
+//            holder.contact_item_tv_email.setText(Contact.getEmail());
             if (Contact.getPhone().trim().length() <= 1) {
                 holder.contact_item_iv_call.setVisibility(GONE);
-                holder.contact_item_iv_add.setVisibility(GONE);
+//                holder.contact_item_iv_add.setVisibility(GONE);
             }
 //            holder.contact_item_iv_add.setOnClickListener(new View.OnClickListener() {
 //                @Override
@@ -175,8 +177,9 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView contact_item_tv_dpart, contact_item_tv_name, contact_item_tv_number, contact_item_tv_email;
-        public ImageView contact_item_iv_call, contact_item_iv_add;
+        public TextView contact_item_tv_dpart, contact_item_tv_name, contact_item_tv_number;
+//        public TextView contact_item_tv_email;
+        public ImageView contact_item_iv_call;
         public RelativeLayout contact_item_rl;
 
         public ViewHolder(View itemLayoutView) {
@@ -185,9 +188,8 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
             contact_item_tv_name = (TextView) itemLayoutView.findViewById(R.id.contact_item_tv_name);
             contact_item_tv_number = (TextView) itemLayoutView.findViewById(R.id.contact_item_tv_number);
             contact_item_tv_dpart = (TextView) itemLayoutView.findViewById(R.id.contact_item_tv_dpart);
-            contact_item_tv_email = (TextView) itemLayoutView.findViewById(R.id.contact_item_tv_email);
+//            contact_item_tv_email = (TextView) itemLayoutView.findViewById(R.id.contact_item_tv_email);
             contact_item_rl = (RelativeLayout) itemLayoutView.findViewById(R.id.contact_item_rl);
-            contact_item_iv_add = (ImageView) itemLayoutView.findViewById(R.id.contact_item_iv_add);
         }
     }
 
