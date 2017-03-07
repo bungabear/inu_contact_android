@@ -1,5 +1,6 @@
 package com.tistory.s1s1s1.inu_contact;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -29,13 +30,20 @@ import android.widget.Toast;
 
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 import com.tistory.s1s1s1.inu_contact.RecyclerView.MainAdapter;
 import com.tistory.s1s1s1.inu_contact.R;
 import com.tistory.s1s1s1.inu_contact.RecyclerView.ContactAdapter;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+
+import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,10 +52,10 @@ public class MainActivity extends AppCompatActivity {
     public static Context mContext2;
 
     //    private boolean isfirst = true;
-    private SharedPreferences prefs;
-    private SharedPreferences.Editor editor;
+//    private SharedPreferences prefs;
+//    private SharedPreferences.Editor editor;
 
-    private Date updatedate;
+//    private Date updatedate;
 
     public static DBHelper dbHelper;
 
@@ -65,6 +73,11 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean issearch=false;
 
+    private RestClient restClient;
+    private RequestParams params = new RequestParams();
+
+    private ProgressDialog progressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,8 +86,7 @@ public class MainActivity extends AppCompatActivity {
         mContext = getApplication();
         mContext2 = MainActivity.this;
 
-
-
+        restClient = new RestClient(MainActivity.this);
 
         actionbar_tv_title = (TextView) findViewById(R.id.actionbar_tv_title);
         Typeface tf = Typeface.createFromAsset(getAssets(), "NanumGothicBold.ttf");
@@ -147,13 +159,17 @@ public class MainActivity extends AppCompatActivity {
         actionbar_iv_info.setOnClickListener(mClickListener);
 
 
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        editor = prefs.edit();
+//        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+//        editor = prefs.edit();
 
         dbHelper = new DBHelper(getApplicationContext(), "contact.db", null, 1);
 
         main_rv = (RecyclerView) findViewById(R.id.main_rv);
         main_rv.setLayoutManager(new LinearLayoutManager(this));
+
+        bpch = new BackPressCloseHandler(this);
+
+
 
         PermissionListener permissionListener = new PermissionListener() {
             @Override
@@ -166,9 +182,6 @@ public class MainActivity extends AppCompatActivity {
 //                Toast.makeText(mContext, "권한 요청이 거부되었습니다.", Toast.LENGTH_SHORT).show();
             }
         };
-
-        bpch = new BackPressCloseHandler(this);
-
         if(networkCheck()==false){
             AlertDialog dialog = new AlertDialog.Builder(this).create();
             dialog.setMessage(getString(R.string.no_internet));
@@ -189,81 +202,81 @@ public class MainActivity extends AppCompatActivity {
 //                .setDeniedMessage("만일 권한 요청을 거부할 경우, 앱에서 바로 통화 발신이 불가합니다.\n\n[설정] > [권한]에서 권한을 허용해주세요.")
                     .setPermissions(android.Manifest.permission.CALL_PHONE).check();
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            if(!prefs.contains("lastupdate")) {
-                Date date = new Date();
-                String sdate = sdf.format(date);
-                editor.putString("lastupdate", sdate);
-                editor.commit();
-                JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
-                jsoupAsyncTask.execute();
-            } else {
-                Date date = new Date();
-                String sdate = sdf.format(date);
-                if (!prefs.getString("lastupdate", null).equals(sdate)) {
-                    JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
-                    jsoupAsyncTask.execute();
-                } else {
-//                    ArrayList<String> parts = dbHelper.getPart();
-                    ArrayList<Contact> parts = dbHelper.getPartC();
-//                    MainAdapter mainAdapter = new MainAdapter(getApplication(), parts);
-                    ContactAdapter contactAdapter = new ContactAdapter(getApplication(), parts);
-//                    main_rv.setAdapter(mainAdapter);
-                    main_rv.setAdapter(contactAdapter);
-                    main_rv.setItemAnimator(new DefaultItemAnimator());
-                    MainActivity.actionbar_tv_title.setText(R.string.app_name);
-                    rv_level = 0;
+            restClient.get("contact", params, new JsonHttpResponseHandler() {
+
+
+                @Override
+                public void onStart() {
+                    super.onStart();
+                    progressDialog = new ProgressDialog(MainActivity.this);
+                    progressDialog.setMessage("데이터를 불러오는 중입니다...");
+//                    progressDialog.setIndeterminate(false);
+                    progressDialog.setCanceledOnTouchOutside(false);
+                    progressDialog.show();
                 }
-            }
-        }
-//
-//        if(dbHelper.getDBCount()==0){
-//            if(networkCheck()==false){
-//                AlertDialog dialog = new AlertDialog.Builder(this).create();
-//                dialog.setMessage(getString(R.string.no_internet));
-//                dialog.setButton(AlertDialog.BUTTON_POSITIVE, "확인", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialogInterface, int i) {
-//                        finish();
+
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                    super.onSuccess(statusCode, headers, response);
+                    ArrayList<Contact> contacts = new ArrayList<Contact>();
+                    for(int i=0;i<response.length();i++){
+                        try {
+                            JSONObject object = response.getJSONObject(i);
+                            String part = object.getString("PART").toString().trim();
+                            if(part.equals("null")) part="";
+                            String dpart = object.getString("DPART").toString().trim();
+                            if(dpart.equals("null")) dpart="";
+                            String name = object.getString("NAME").toString().trim();
+                            if(name.equals("null")) name="";
+                            String phone = object.getString("PHONE").toString().trim();
+                            if(phone.equals("null")) phone="";
+                            String position = object.getString("POSITION").toString().trim();
+                            if(position.equals("null")) position="";
+                            Contact contact = new Contact();
+                            contact.setData(0, part, dpart, position, name, "", phone, "", 0);
+                            contacts.add(contact);
+                        } catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                    dbHelper.delete();
+                    dbHelper.insertArr(contacts);
+
+                    contacts = dbHelper.getPartC();
+                    ContactAdapter contactAdapter = new ContactAdapter(MainActivity.this, contacts);
+                    main_rv.setAdapter(contactAdapter);
+
+                    main_rv.setItemAnimator(new DefaultItemAnimator());
+                    actionbar_tv_title.setText(R.string.app_name);
+                    rv_level=0;
+                    if(actionbar_et_search.isFocused()){
+                        actionbar_et_search.clearFocus();
+                    }
+
+                    if(progressDialog.isShowing()){
+                        progressDialog.dismiss();
+                    }
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                    super.onFailure(statusCode, headers, responseString, throwable);
+                    Toast.makeText(MainActivity.this, "데이터 다운로드에 실패하였습니다.\n새로고침을 눌러주세요.", Toast.LENGTH_SHORT).show();
+
+//                    if(progressDialog.isShowing()){
+//                        progressDialog.dismiss();
 //                    }
-//                });
-//                dialog.setCancelable(false);
-//                dialog.show();
-//                Button pbutton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-//                pbutton.setTextColor(Color.BLACK);
-//            } else {
-//                new TedPermission(mContext)
-//                        .setPermissionListener(permissionListener)
-////                .setRationaleMessage("앱에서 바로 통화 발신을 위해서는 권한이 필요합니다.")
-////                .setDeniedMessage("만일 권한 요청을 거부할 경우, 앱에서 바로 통화 발신이 불가합니다.\n\n[설정] > [권한]에서 권한을 허용해주세요.")
-//                        .setPermissions(android.Manifest.permission.CALL_PHONE).check();
-//
-//                JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
-//                jsoupAsyncTask.execute();
-//            }
-//        } else {
-//            //db가 이미 있을 경우
-//            new TedPermission(mContext)
-//                    .setPermissionListener(permissionListener)
-////                .setRationaleMessage("앱에서 바로 통화 발신을 위해서는 권한이 필요합니다.")
-////                .setDeniedMessage("만일 권한 요청을 거부할 경우, 앱에서 바로 통화 발신이 불가합니다.\n\n[설정] > [권한]에서 권한을 허용해주세요.")
-//                    .setPermissions(android.Manifest.permission.CALL_PHONE).check();
-//
-//            if(networkCheck()==true) {
-//                updateCheck();
-//            }
-//
-//            dbHelper.delete();
-//            JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
-//            jsoupAsyncTask.execute();
-//
-////            ArrayList<String> parts = dbHelper.getPart();
-////            MainAdapter mainAdapter = new MainAdapter(getApplication(), parts);
-////            main_rv.setAdapter(mainAdapter);
-////            main_rv.setItemAnimator(new DefaultItemAnimator());
-////            MainActivity.actionbar_tv_title.setText(R.string.app_name);
-////            rv_level = 0;
-//        }
+                }
+
+                @Override
+                public void onFinish() {
+
+//                    if(progressDialog.isShowing()){
+//                        progressDialog.dismiss();
+//                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -325,8 +338,8 @@ public class MainActivity extends AppCompatActivity {
                         dialog.setButton(AlertDialog.BUTTON_POSITIVE, "예", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
-                                jsoupAsyncTask.execute();
+//                                JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
+//                                jsoupAsyncTask.execute();
 
 //                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 //                                Date date = new Date();
@@ -404,59 +417,59 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    public void updateCheck(){
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-        if(!prefs.contains("lastupdate")) {
-            Date date = new Date();
-            String sdate = sdf.format(date);
-            editor.putString("lastupdate", sdate);
-            editor.commit();
-        }
-
-        Date today = new Date();
-        String lastupdate = prefs.getString("lastupdate", "2016-01-01");
-        Date lastupdate2 = new Date();
-        try {
-            lastupdate2 = sdf.parse(lastupdate);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        long between = ((today.getTime() - lastupdate2.getTime()) / 1000) / (60 * 60 * 24);
-        if (between >= 30) {
-            //한 달 간격으로 자동 업데이트.
-//                Toast.makeText(mContext, "30일이 지났습니다. 업데이트 하시겠습니까?", Toast.LENGTH_SHORT).show();
-            AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.mContext2);
-            dialog.setTitle("데이터 업데이트").setMessage("데이터 업데이트가 있습니다. 진행하시겠습니까?\n(아니오를 선택한 경우 수동으로 업데이트 해주세요.)").setIcon(R.drawable.ic_refresh_pc)
-                    .setPositiveButton("예", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
-                            jsoupAsyncTask.execute();
-                        }
-                    }).setNegativeButton("아니오", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-            AlertDialog alert = dialog.create();
-            alert.show();
-            Button nbutton = alert.getButton(DialogInterface.BUTTON_NEGATIVE);
-            nbutton.setTextColor(Color.BLACK);
-            Button pbutton = alert.getButton(DialogInterface.BUTTON_POSITIVE);
-            pbutton.setTextColor(Color.BLACK);
-
-            Date date = new Date();
-            String todayy = sdf.format(date);
-            editor.putString("lastupdate", todayy);
-            editor.commit();
-        }
+//    public void updateCheck(){
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//
+//        if(!prefs.contains("lastupdate")) {
+//            Date date = new Date();
+//            String sdate = sdf.format(date);
+//            editor.putString("lastupdate", sdate);
+//            editor.commit();
+//        }
+//
+//        Date today = new Date();
+//        String lastupdate = prefs.getString("lastupdate", "2016-01-01");
+//        Date lastupdate2 = new Date();
+//        try {
+//            lastupdate2 = sdf.parse(lastupdate);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        long between = ((today.getTime() - lastupdate2.getTime()) / 1000) / (60 * 60 * 24);
+//        if (between >= 30) {
+//            //한 달 간격으로 자동 업데이트.
+////                Toast.makeText(mContext, "30일이 지났습니다. 업데이트 하시겠습니까?", Toast.LENGTH_SHORT).show();
+//            AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.mContext2);
+//            dialog.setTitle("데이터 업데이트").setMessage("데이터 업데이트가 있습니다. 진행하시겠습니까?\n(아니오를 선택한 경우 수동으로 업데이트 해주세요.)").setIcon(R.drawable.ic_refresh_pc)
+//                    .setPositiveButton("예", new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialog, int which) {
+//                            JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
+//                            jsoupAsyncTask.execute();
+//                        }
+//                    }).setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface dialog, int which) {
+//                    dialog.dismiss();
+//                }
+//            });
+//            AlertDialog alert = dialog.create();
+//            alert.show();
+//            Button nbutton = alert.getButton(DialogInterface.BUTTON_NEGATIVE);
+//            nbutton.setTextColor(Color.BLACK);
+//            Button pbutton = alert.getButton(DialogInterface.BUTTON_POSITIVE);
+//            pbutton.setTextColor(Color.BLACK);
+//
+//            Date date = new Date();
+//            String todayy = sdf.format(date);
+//            editor.putString("lastupdate", todayy);
+//            editor.commit();
+//        }
 //        else {
 //            JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
 //            jsoupAsyncTask.execute();
 //        }
-    }
+//    }
 
     public Boolean networkCheck() {
         ConnectivityManager manager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);

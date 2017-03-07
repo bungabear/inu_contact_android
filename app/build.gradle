@@ -7,8 +7,8 @@ android {
         applicationId "com.tistory.s1s1s1.inu_contact"
         minSdkVersion 14
         targetSdkVersion 24
-        versionCode 4
-        versionName "3.2"
+        versionCode 5
+        versionName "3.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -29,4 +29,5 @@ dependencies {
     compile 'org.jsoup:jsoup:1.10.1'
     compile 'com.android.support:design:24.2.0'
     compile 'gun0912.ted:tedpermission:1.0.2'
+    compile 'com.loopj.android:android-async-http:1.4.9'
 }

@@ -95,7 +95,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public ArrayList<String> getPart(){
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT DISTINCT PART FROM CONTACT ORDER BY PART ASC", null);
+        Cursor cursor = db.rawQuery("SELECT DISTINCT PART FROM CONTACT", null);
         ArrayList<String> parts = new ArrayList<>();
         String part = "";
         while(cursor.moveToNext()){
@@ -108,7 +108,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public ArrayList<Contact> getPartC(){
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT DISTINCT PART FROM CONTACT ORDER BY PART ASC", null);
+        Cursor cursor = db.rawQuery("SELECT DISTINCT PART FROM CONTACT", null);
         ArrayList<Contact> parts = new ArrayList<>();
         Contact contact;
         while(cursor.moveToNext()){
