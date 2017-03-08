@@ -7,8 +7,8 @@ android {
         applicationId "com.tistory.s1s1s1.inu_contact"
         minSdkVersion 14
         targetSdkVersion 24
-        versionCode 5
-        versionName "3.3"
+        versionCode 6
+        versionName "3.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

@@ -115,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                actionbar_tv_title.setText("검색");
                 String keyword = actionbar_et_search.getText().toString();
                 if(!keyword.equals("")) {
                     issearch = true;
@@ -143,6 +144,22 @@ public class MainActivity extends AppCompatActivity {
                             part = part.substring(0, 8) + "...";
                         }
 //                    actionbar_tv_title.setText(part + " - 검색");
+                    }
+                } else {
+                    if(issearch == true) {
+                        main_rv.removeAllViews();
+                        ArrayList<Contact> parts = dbHelper.getPartC();
+//                    ArrayList<Contact> contacts = dbHelper.searchC(keyword);
+
+//                    parts.addAll(contacts);
+
+                        ContactAdapter contactAdapter = new ContactAdapter(getApplication(), parts);
+                        main_rv.setItemAnimator(new DefaultItemAnimator());
+                        main_rv.setAdapter(contactAdapter);
+                        MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
+                        rv_level = 0;
+                        issearch = false;
+                        actionbar_tv_title.setText(R.string.app_name);
                     }
                 }
             }
@@ -295,6 +312,7 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.actionbar_et_search.clearFocus();
             }
             MainActivity.actionbar_et_search.setText("");
+            actionbar_tv_title.setText(R.string.app_name);
             issearch=false;
         } else if (MainActivity.rv_level == 1) {
 //            ArrayList<String> parts = dbHelper.getPart();
