@@ -20,6 +20,7 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE CONTACT(_id INTEGER PRIMARY KEY AUTOINCREMENT, part TEXT, dpart TEXT, position TEXT, name TEXT, task TEXT, phone TEXT, email TEXT, favorite INTEGER);");
+//        db.execSQL("CREATE TABLE FAVORITE(_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT");
         // 소속, 상세소속, 직위, 이름, 직무, 전화번호, 이메일
     }
 

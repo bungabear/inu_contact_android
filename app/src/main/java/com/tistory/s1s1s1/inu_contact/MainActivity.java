@@ -9,6 +9,8 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -28,11 +30,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
+import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-import com.tistory.s1s1s1.inu_contact.RecyclerView.MainAdapter;
 import com.tistory.s1s1s1.inu_contact.R;
 import com.tistory.s1s1s1.inu_contact.RecyclerView.ContactAdapter;
 
@@ -44,22 +49,21 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import cz.msebera.android.httpclient.Header;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
+    private Call<JsonElement> contact;
+    private Singleton singleton;
+
     public static Context mContext;
-
     public static Context mContext2;
-
-    //    private boolean isfirst = true;
-//    private SharedPreferences prefs;
-//    private SharedPreferences.Editor editor;
-
-//    private Date updatedate;
-
     public static DBHelper dbHelper;
-
     public static RecyclerView main_rv;
+
+    private static AsyncHttpClient restClient;
 
     public static int rv_level; //현재 리사이클러뷰의 레벨
 
@@ -71,12 +75,12 @@ public class MainActivity extends AppCompatActivity {
     private ImageView actionbar_iv_search;
     private ImageView actionbar_iv_info;
 
-    private boolean issearch=false;
+    private boolean issearch = false;
 
-    private RestClient restClient;
-    private RequestParams params = new RequestParams();
+//    private RestClient restClient;
+//    private RequestParams params = new RequestParams();
 
-    private ProgressDialog progressDialog;
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +90,10 @@ public class MainActivity extends AppCompatActivity {
         mContext = getApplication();
         mContext2 = MainActivity.this;
 
-        restClient = new RestClient(MainActivity.this);
+//        restClient = new RestClient(MainActivity.this);
+//        restClient = new AsyncHttpClient();
+
+        singleton = Singleton.getInstance(this);
 
         actionbar_tv_title = (TextView) findViewById(R.id.actionbar_tv_title);
         Typeface tf = Typeface.createFromAsset(getAssets(), "NanumGothicBold.ttf");
@@ -97,9 +104,9 @@ public class MainActivity extends AppCompatActivity {
         actionbar_et_search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
-                if(i == EditorInfo.IME_ACTION_SEARCH){
+                if (i == EditorInfo.IME_ACTION_SEARCH) {
 //                    actionbar_iv_search.performClick();
-                    InputMethodManager imm = (InputMethodManager)mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(MainActivity.actionbar_et_search.getWindowToken(), 0);
                     return true;
                 }
@@ -107,69 +114,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        actionbar_et_search.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                actionbar_tv_title.setText("검색");
-                String keyword = actionbar_et_search.getText().toString();
-                if(!keyword.equals("")) {
-                    issearch = true;
-                    if (rv_level == 0) {
-                        main_rv.removeAllViews();
-                        ArrayList<Contact> parts = dbHelper.searchP2(keyword);
-                        ArrayList<Contact> contacts = dbHelper.searchC(keyword);
-
-                        parts.addAll(contacts);
-
-                        ContactAdapter contactAdapter = new ContactAdapter(getApplication(), parts);
-                        main_rv.setItemAnimator(new DefaultItemAnimator());
-                        main_rv.setAdapter(contactAdapter);
-                        MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
-//                    MainActivity.actionbar_tv_title.setText("검색");
-                    } else {
-                        main_rv.removeAllViews();
-                        String part = actionbar_tv_title.getText().toString();
-                        ArrayList<Contact> contacts = dbHelper.searchC(keyword, part);
-
-                        ContactAdapter contactAdapter = new ContactAdapter(getApplication(), contacts);
-                        main_rv.setItemAnimator(new DefaultItemAnimator());
-                        main_rv.setAdapter(contactAdapter);
-                        MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
-                        if (part.length() >= 9) {
-                            part = part.substring(0, 8) + "...";
-                        }
-//                    actionbar_tv_title.setText(part + " - 검색");
-                    }
-                } else {
-                    if(issearch == true) {
-                        main_rv.removeAllViews();
-                        ArrayList<Contact> parts = dbHelper.getPartC();
-//                    ArrayList<Contact> contacts = dbHelper.searchC(keyword);
-
-//                    parts.addAll(contacts);
-
-                        ContactAdapter contactAdapter = new ContactAdapter(getApplication(), parts);
-                        main_rv.setItemAnimator(new DefaultItemAnimator());
-                        main_rv.setAdapter(contactAdapter);
-                        MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
-                        rv_level = 0;
-                        issearch = false;
-                        actionbar_tv_title.setText(R.string.app_name);
-                    }
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
-
+        actionbar_et_search.addTextChangedListener(mTextWatcher);
         actionbar_iv_search = (ImageView) findViewById(R.id.actionbar_iv_search);
         actionbar_iv_search.setOnClickListener(mClickListener);
         actionbar_iv_info = (ImageView) findViewById(R.id.actionbar_iv_info);
@@ -187,7 +132,6 @@ public class MainActivity extends AppCompatActivity {
         bpch = new BackPressCloseHandler(this);
 
 
-
         PermissionListener permissionListener = new PermissionListener() {
             @Override
             public void onPermissionGranted() {
@@ -199,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
 //                Toast.makeText(mContext, "권한 요청이 거부되었습니다.", Toast.LENGTH_SHORT).show();
             }
         };
-        if(networkCheck()==false){
+        if (networkCheck() == false) {
             AlertDialog dialog = new AlertDialog.Builder(this).create();
             dialog.setMessage(getString(R.string.no_internet));
             dialog.setButton(AlertDialog.BUTTON_POSITIVE, "확인", new DialogInterface.OnClickListener() {
@@ -219,86 +163,190 @@ public class MainActivity extends AppCompatActivity {
 //                .setDeniedMessage("만일 권한 요청을 거부할 경우, 앱에서 바로 통화 발신이 불가합니다.\n\n[설정] > [권한]에서 권한을 허용해주세요.")
                     .setPermissions(android.Manifest.permission.CALL_PHONE).check();
 
-            restClient.get("contact", params, new JsonHttpResponseHandler() {
-
-
-                @Override
-                public void onStart() {
-                    super.onStart();
-                    progressDialog = new ProgressDialog(MainActivity.this);
-                    progressDialog.setMessage("데이터를 불러오는 중입니다...");
-//                    progressDialog.setIndeterminate(false);
-                    progressDialog.setCanceledOnTouchOutside(false);
-                    progressDialog.show();
-                }
-
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                    super.onSuccess(statusCode, headers, response);
-                    ArrayList<Contact> contacts = new ArrayList<Contact>();
-                    for(int i=0;i<response.length();i++){
-                        try {
-                            JSONObject object = response.getJSONObject(i);
-                            String part = object.getString("PART").toString().trim();
-                            if(part.equals("null")) part="";
-                            String dpart = object.getString("DPART").toString().trim();
-                            if(dpart.equals("null")) dpart="";
-                            String name = object.getString("NAME").toString().trim();
-                            if(name.equals("null")) name="";
-                            String phone = object.getString("PHONE").toString().trim();
-                            if(phone.equals("null")) phone="";
-                            String position = object.getString("POSITION").toString().trim();
-                            if(position.equals("null")) position="";
-                            Contact contact = new Contact();
-                            contact.setData(0, part, dpart, position, name, "", phone, "", 0);
-                            contacts.add(contact);
-                        } catch (Exception e){
-                            e.printStackTrace();
-                        }
-                    }
-                    dbHelper.delete();
-                    dbHelper.insertArr(contacts);
-
-                    contacts = dbHelper.getPartC();
-                    ContactAdapter contactAdapter = new ContactAdapter(MainActivity.this, contacts);
-                    main_rv.setAdapter(contactAdapter);
-
-                    main_rv.setItemAnimator(new DefaultItemAnimator());
-                    actionbar_tv_title.setText(R.string.app_name);
-                    rv_level=0;
-                    if(actionbar_et_search.isFocused()){
-                        actionbar_et_search.clearFocus();
-                    }
-
-                    if(progressDialog.isShowing()){
-                        progressDialog.dismiss();
-                    }
-                }
-
-                @Override
-                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                    super.onFailure(statusCode, headers, responseString, throwable);
-                    Toast.makeText(MainActivity.this, "데이터 다운로드에 실패하였습니다.\n새로고침을 눌러주세요.", Toast.LENGTH_SHORT).show();
-
-//                    if(progressDialog.isShowing()){
-//                        progressDialog.dismiss();
-//                    }
-                }
-
-                @Override
-                public void onFinish() {
-
-//                    if(progressDialog.isShowing()){
-//                        progressDialog.dismiss();
-//                    }
-                }
-            });
+            //get DB
+            getDB();
         }
+    }
+
+
+    Handler handler = null;
+
+    private void getDB() {
+
+        progressDialog = new ProgressDialog(MainActivity.this);
+        progressDialog.setMessage("데이터를 불러오는 중입니다.");
+        progressDialog.setCanceledOnTouchOutside(false);
+        progressDialog.show();
+
+        contact = singleton.getRetroService().contact();
+        contact.enqueue(new Callback<JsonElement>() {
+            @Override
+            public void onResponse(Call<JsonElement> call, Response<JsonElement> response) {
+                JsonArray result = response.body().getAsJsonArray();
+
+                ArrayList<Contact> contacts = new ArrayList<Contact>();
+                for (int i = 0; i < result.size(); i++) {
+                    try {
+//                        JSONObject object = response.getJSONObject(i);
+                        JsonObject object = result.get(i).getAsJsonObject();
+//                        String part = object.getString("PART").toString().trim();
+                        String part = object.get("PART").getAsString().trim();
+                        if (part.equals("null")) part = "";
+                        String dpart = object.get("DPART").getAsString().trim();
+                        if (dpart.equals("null")) dpart = "";
+                        String name = object.get("NAME").getAsString().trim();
+                        if (name.equals("null")) name = "";
+                        String phone = object.get("PHONE").getAsString().trim();
+                        if (phone.equals("null")) phone = "";
+                        String position = object.get("POSITION").getAsString().trim();
+                        if (position.equals("null")) position = "";
+                        Contact contact = new Contact();
+                        contact.setData(0, part, dpart, position, name, "", phone, "", 0);
+                        contacts.add(contact);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                dbHelper.delete();
+                dbHelper.insertArr(contacts);
+
+                contacts = dbHelper.getPartC();
+                ContactAdapter contactAdapter = new ContactAdapter(MainActivity.this, contacts);
+                main_rv.setAdapter(contactAdapter);
+
+                main_rv.setItemAnimator(new DefaultItemAnimator());
+                actionbar_tv_title.setText(R.string.app_name);
+                rv_level = 0;
+                if (actionbar_et_search.isFocused()) {
+                    actionbar_et_search.clearFocus();
+                }
+
+                if(progressDialog.isShowing()) progressDialog.dismiss();
+
+            }
+
+            @Override
+            public void onFailure(Call<JsonElement> call, Throwable t) {
+
+            }
+        });
+
+
+//        restClient = new AsyncHttpClient();
+//        restClient.setMaxRetriesAndTimeout(2, 5000);
+////
+////        ProgressDialog pd;
+//
+//        final JsonHttpResponseHandler jsonHttpResponseHandler = new JsonHttpResponseHandler() {
+//
+//
+//            @Override
+//            public void onStart() {
+////                super.onStart();
+//
+//            }
+//
+//
+//            @Override
+//            public void onFinish() {
+//
+//
+//            }
+//        };
+//
+////        progressDialog = new ProgressDialog(MainActivity.this);
+////        progressDialog.setMessage("데이터를 불러오는 중입니다...");
+////        progressDialog.setCanceledOnTouchOutside(false);
+////        progressDialog.setIndeterminate(true);
+////        progressDialog.show();
+//
+////        restClient.get("http://117.16.191.242:8080/contact", params, new JsonHttpResponseHandler() {
+//
+//
+////        restClient.get("contact", params, new JsonHttpResponseHandler() {
+////
+////        });
+//
+//        handler = new Handler();
+//
+//        Thread t = new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//
+////                progressDialog = new ProgressDialog(MainActivity.this);
+////                progressDialog.setMessage("데이터를 불러오는 중입니다...");
+////                progressDialog.setCanceledOnTouchOutside(false);
+////                progressDialog.show();
+//                restClient.get(server_url, new JsonHttpResponseHandler() {
+//                    @Override
+//                    public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+////                super.onSuccess(statusCode, headers, response);
+//                        ArrayList<Contact> contacts = new ArrayList<Contact>();
+//                        for (int i = 0; i < response.length(); i++) {
+//                            try {
+//                                JSONObject object = response.getJSONObject(i);
+//                                String part = object.getString("PART").toString().trim();
+//                                if (part.equals("null")) part = "";
+//                                String dpart = object.getString("DPART").toString().trim();
+//                                if (dpart.equals("null")) dpart = "";
+//                                String name = object.getString("NAME").toString().trim();
+//                                if (name.equals("null")) name = "";
+//                                String phone = object.getString("PHONE").toString().trim();
+//                                if (phone.equals("null")) phone = "";
+//                                String position = object.getString("POSITION").toString().trim();
+//                                if (position.equals("null")) position = "";
+//                                Contact contact = new Contact();
+//                                contact.setData(0, part, dpart, position, name, "", phone, "", 0);
+//                                contacts.add(contact);
+//                            } catch (Exception e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+//
+//                        dbHelper.delete();
+//                        dbHelper.insertArr(contacts);
+//
+////                        if(progressDialog.isShowing()) progressDialog.dismiss();
+//
+//                    }
+//
+//                    @Override
+//                    public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+//                        Toast.makeText(MainActivity.this, "데이터 다운로드에 실패하였습니다.\n새로고침을 눌러주세요.", Toast.LENGTH_SHORT).show();
+//
+////                        if(progressDialog.isShowing()) progressDialog.dismiss();
+//                    }
+//
+//                });
+//
+//                handler.post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//
+//
+//
+////                        if(progressDialog.isShowing()) progressDialog.dismiss();
+//
+//                    }
+//                });
+//            }
+//        });
+//        t.start();
+
+//        Handler handler = new Handler() {
+//            @Override
+//            public void handleMessage(Message msg) {
+//
+//            }
+//        };
+//
+//        handler.sendEmptyMessage(0);
     }
 
     @Override
     public void onBackPressed() {
-        if(issearch==true){
+        if (issearch == true) {
 //            ArrayList<String> parts = dbHelper.getPart();
 //            MainAdapter mainAdapter = new MainAdapter(mContext, parts);
 //            MainActivity.main_rv.setAdapter(mainAdapter);
@@ -307,13 +355,13 @@ public class MainActivity extends AppCompatActivity {
             MainActivity.main_rv.setAdapter(contactAdapter);
             MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
             MainActivity.actionbar_tv_title.setText(R.string.app_name);
-            MainActivity.rv_level=0;
-            if(MainActivity.actionbar_et_search.isFocused()){
+            MainActivity.rv_level = 0;
+            if (MainActivity.actionbar_et_search.isFocused()) {
                 MainActivity.actionbar_et_search.clearFocus();
             }
             MainActivity.actionbar_et_search.setText("");
             actionbar_tv_title.setText(R.string.app_name);
-            issearch=false;
+            issearch = false;
         } else if (MainActivity.rv_level == 1) {
 //            ArrayList<String> parts = dbHelper.getPart();
 //            MainAdapter mainAdapter = new MainAdapter(getApplication(), parts);
@@ -325,10 +373,10 @@ public class MainActivity extends AppCompatActivity {
             MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
             MainActivity.actionbar_tv_title.setText(R.string.app_name);
             MainActivity.rv_level = 0;
-            if(MainActivity.actionbar_et_search.isFocused()){
+            if (MainActivity.actionbar_et_search.isFocused()) {
                 MainActivity.actionbar_et_search.clearFocus();
             }
-        } else if(MainActivity.actionbar_et_search.isFocused()){
+        } else if (MainActivity.actionbar_et_search.isFocused()) {
             MainActivity.actionbar_et_search.clearFocus();
         } else bpch.onBackPressed();
 
@@ -336,34 +384,91 @@ public class MainActivity extends AppCompatActivity {
 //        super.onBackPressed();
     }
 
+    TextWatcher mTextWatcher = new TextWatcher() {
+        //검색 edittext
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            actionbar_tv_title.setText("검색");
+            String keyword = actionbar_et_search.getText().toString();
+            if (!keyword.equals("")) {
+                issearch = true;
+                if (rv_level == 0) {
+                    main_rv.removeAllViews();
+                    ArrayList<Contact> parts = dbHelper.searchP2(keyword);
+                    ArrayList<Contact> contacts = dbHelper.searchC(keyword);
+
+                    parts.addAll(contacts);
+
+                    ContactAdapter contactAdapter = new ContactAdapter(getApplication(), parts);
+                    main_rv.setItemAnimator(new DefaultItemAnimator());
+                    main_rv.setAdapter(contactAdapter);
+                    MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
+//                    MainActivity.actionbar_tv_title.setText("검색");
+                } else {
+                    main_rv.removeAllViews();
+                    String part = actionbar_tv_title.getText().toString();
+                    ArrayList<Contact> contacts = dbHelper.searchC(keyword, part);
+
+                    ContactAdapter contactAdapter = new ContactAdapter(getApplication(), contacts);
+                    main_rv.setItemAnimator(new DefaultItemAnimator());
+                    main_rv.setAdapter(contactAdapter);
+                    MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
+                    if (part.length() >= 9) {
+                        part = part.substring(0, 8) + "...";
+                    }
+//                    actionbar_tv_title.setText(part + " - 검색");
+                }
+            } else {
+                if (issearch == true) {
+                    main_rv.removeAllViews();
+                    ArrayList<Contact> parts = dbHelper.getPartC();
+//                    ArrayList<Contact> contacts = dbHelper.searchC(keyword);
+
+//                    parts.addAll(contacts);
+
+                    ContactAdapter contactAdapter = new ContactAdapter(getApplication(), parts);
+                    main_rv.setItemAnimator(new DefaultItemAnimator());
+                    main_rv.setAdapter(contactAdapter);
+                    MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
+                    rv_level = 0;
+                    issearch = false;
+                    actionbar_tv_title.setText(R.string.app_name);
+                }
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+
+        }
+    };
+
     ImageView.OnClickListener mClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             int id = v.getId();
-            InputMethodManager imm = (InputMethodManager)mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(MainActivity.actionbar_et_search.getWindowToken(), 0);
-            if(MainActivity.actionbar_et_search.isFocused()){
+            if (MainActivity.actionbar_et_search.isFocused()) {
                 MainActivity.actionbar_et_search.clearFocus();
             }
 
             switch (id) {
                 case R.id.actionbar_iv_refresh:
                     final AlertDialog dialog = new AlertDialog.Builder(v.getContext()).create();
-                    if(networkCheck()==true) {
+                    if (networkCheck() == true) {
                         dialog.setTitle("새로고침");
                         dialog.setMessage("데이터를 새로고침 하시겠습니까?\n");
                         dialog.setIcon(R.drawable.ic_refresh_pc);
                         dialog.setButton(AlertDialog.BUTTON_POSITIVE, "예", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-//                                JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask(MainActivity.this);
-//                                jsoupAsyncTask.execute();
-
-//                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-//                                Date date = new Date();
-//                                String today = sdf.format(date);
-//                                editor.putString("lastupdate", today);
-//                                editor.commit();
+                                getDB();
                             }
                         });
                         dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "아니오", new DialogInterface.OnClickListener() {
@@ -490,7 +595,7 @@ public class MainActivity extends AppCompatActivity {
 //    }
 
     public Boolean networkCheck() {
-        ConnectivityManager manager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo phone = manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
         NetworkInfo wifi = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 

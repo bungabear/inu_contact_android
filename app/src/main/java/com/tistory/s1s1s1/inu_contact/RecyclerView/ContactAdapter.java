@@ -79,7 +79,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
                     MainActivity.main_rv.setAdapter(ContactAdapter);
                     MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
                     MainActivity.rv_level=1;
-                    MainActivity.actionbar_et_search.setText("");
+//                    MainActivity.actionbar_et_search.setText("");
                 }
             });
         } else {
