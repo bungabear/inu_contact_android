@@ -4,22 +4,20 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -30,40 +28,27 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.apkfuns.xprogressdialog.XProgressDialog;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
-import com.tistory.s1s1s1.inu_contact.R;
 import com.tistory.s1s1s1.inu_contact.RecyclerView.ContactAdapter;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
-import cz.msebera.android.httpclient.Header;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Call<JsonElement> contact;
-    private Singleton singleton;
 
     public static Context mContext;
     public static Context mContext2;
     public static DBHelper dbHelper;
     public static RecyclerView main_rv;
-
-    private static AsyncHttpClient restClient;
 
     public static int rv_level; //현재 리사이클러뷰의 레벨
 
@@ -75,12 +60,21 @@ public class MainActivity extends AppCompatActivity {
     private ImageView actionbar_iv_search;
     private ImageView actionbar_iv_info;
 
+
+    //    private Call<JsonElement> contact;
+    private Singleton singleton;
+
+    TextView tv_dialog;
+
     private boolean issearch = false;
+
+//    private ContactAdapter contactAdapter;
 
 //    private RestClient restClient;
 //    private RequestParams params = new RequestParams();
 
     ProgressDialog progressDialog;
+//    XProgressDialog xProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +87,9 @@ public class MainActivity extends AppCompatActivity {
 //        restClient = new RestClient(MainActivity.this);
 //        restClient = new AsyncHttpClient();
 
-        singleton = Singleton.getInstance(this);
+//        singleton = Singleton.getInstance(this);
+
+        tv_dialog = (TextView) findViewById(R.id.tv_dialog);
 
         actionbar_tv_title = (TextView) findViewById(R.id.actionbar_tv_title);
         Typeface tf = Typeface.createFromAsset(getAssets(), "NanumGothicBold.ttf");
@@ -173,48 +169,59 @@ public class MainActivity extends AppCompatActivity {
 
     private void getDB() {
 
-        progressDialog = new ProgressDialog(MainActivity.this);
-        progressDialog.setMessage("데이터를 불러오는 중입니다.");
-        progressDialog.setCanceledOnTouchOutside(false);
+//        progressDialog = new ProgressDialog(this);
+//        progressDialog.setIndeterminate(true);
+//        progressDialog.setMessage("데이터를 불러오는 중입니다...");
+//        progressDialog.setCanceledOnTouchOutside(false);
+//        progressDialog.show();
+
+        if (singleton == null) singleton = Singleton.getInstance(this);
+
+//        xProgressDialog = new XProgressDialog(this, "로딩 중...", XProgressDialog.THEME_CIRCLE_PROGRESS);
+//        xProgressDialog.show();
+
+        progressDialog = singleton.Loading(this);
         progressDialog.show();
 
-        contact = singleton.getRetroService().contact();
-        contact.enqueue(new Callback<JsonElement>() {
+        singleton.getRetroService().contact().enqueue(new Callback<JsonElement>() {
             @Override
             public void onResponse(Call<JsonElement> call, Response<JsonElement> response) {
-                JsonArray result = response.body().getAsJsonArray();
-
-                ArrayList<Contact> contacts = new ArrayList<Contact>();
-                for (int i = 0; i < result.size(); i++) {
+                Log.d("TAG", "RETROFIT SUCCESSED");
+                dbHelper.delete();
+                JsonArray jsonArray = response.body().getAsJsonArray();
+                String size = String.valueOf(jsonArray.size());
+                Log.d("TAG", "jsonarray : " + size);
+                JsonObject object;
+                for (int i = 0; i < jsonArray.size(); i++) {
                     try {
-//                        JSONObject object = response.getJSONObject(i);
-                        JsonObject object = result.get(i).getAsJsonObject();
-//                        String part = object.getString("PART").toString().trim();
-                        String part = object.get("PART").getAsString().trim();
-                        if (part.equals("null")) part = "";
-                        String dpart = object.get("DPART").getAsString().trim();
-                        if (dpart.equals("null")) dpart = "";
-                        String name = object.get("NAME").getAsString().trim();
-                        if (name.equals("null")) name = "";
-                        String phone = object.get("PHONE").getAsString().trim();
-                        if (phone.equals("null")) phone = "";
-                        String position = object.get("POSITION").getAsString().trim();
-                        if (position.equals("null")) position = "";
-                        Contact contact = new Contact();
-                        contact.setData(0, part, dpart, position, name, "", phone, "", 0);
-                        contacts.add(contact);
+                        object = jsonArray.get(i).getAsJsonObject();
+                        String part = "";
+                        if (!object.get("PART").isJsonNull()) {
+                            part = object.get("PART").getAsString();
+                        }
+                        String dpart = "";
+                        if (!object.get("DPART").isJsonNull()) {
+                            dpart = object.get("DPART").getAsString();
+                        }
+                        String position = "";
+                        if (!object.get("POSITION").isJsonNull()) {
+                            position = object.get("POSITION").getAsString();
+                        }
+                        String name = "";
+                        if (!object.get("NAME").isJsonNull()) {
+                            name = object.get("NAME").getAsString();
+                        }
+                        String phone = "";
+                        if (!object.get("PHONE").isJsonNull()) {
+                            phone = object.get("PHONE").getAsString();
+                        }
+                        dbHelper.insert(part, dpart, position, name, "", phone, "", 0);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
 
-                dbHelper.delete();
-                dbHelper.insertArr(contacts);
-
-                contacts = dbHelper.getPartC();
-                ContactAdapter contactAdapter = new ContactAdapter(MainActivity.this, contacts);
-                main_rv.setAdapter(contactAdapter);
-
+                main_rv.setAdapter(new ContactAdapter(MainActivity.this, dbHelper.getPartC()));
                 main_rv.setItemAnimator(new DefaultItemAnimator());
                 actionbar_tv_title.setText(R.string.app_name);
                 rv_level = 0;
@@ -222,15 +229,102 @@ public class MainActivity extends AppCompatActivity {
                     actionbar_et_search.clearFocus();
                 }
 
-                if(progressDialog.isShowing()) progressDialog.dismiss();
-
+//                if(xProgressDialog.isShowing()) xProgressDialog.dismiss();
+                progressDialog.dismiss();
+                Log.d("TAG", "Success, count: " + dbHelper.getDBCount());
             }
 
             @Override
             public void onFailure(Call<JsonElement> call, Throwable t) {
-
+                Log.d("TAG", "RETROFIT FAILED");
+                progressDialog.dismiss();
+//                if(xProgressDialog.isShowing()) xProgressDialog.dismiss();
+                Toast.makeText(MainActivity.this, "데이터 업데이트에 실패하였습니다.\n새로고침을 눌러주세요.", Toast.LENGTH_SHORT).show();
             }
         });
+
+//        contact = singleton.getRetroService().contact();
+//        contact.enqueue(new Callback<JsonElement>() {
+//            @Override
+//            public void onResponse(Call<JsonElement> call, Response<JsonElement> response) {
+//
+////                JsonArray jsonArray = response.body().getAsJsonArray();
+////                JsonObject object;
+////                for (int i=0;i<jsonArray.size();i++){
+////                    object = jsonArray.get(i).getAsJsonObject();
+////                    Log.d("TAG", object.get("NAME").getAsString());
+//////                    dbHelper.insert();
+////                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<JsonElement> call, Throwable t) {
+//
+//            }
+//        });
+
+
+//        RetroAsync retroAsync = new RetroAsync(MainActivity.this, progressDialog);
+//        RetroAsync retroAsync = new RetroAsync(MainActivity.this, tv_dialog);
+//        retroAsync.execute();
+
+//        progressDialog = new ProgressDialog(MainActivity.this);
+//        progressDialog.setMessage("데이터를 불러오는 중입니다.");
+//        progressDialog.setCanceledOnTouchOutside(false);
+//        progressDialog.show();
+//
+//        contact = singleton.getRetroService().contact();
+//        contact.enqueue(new Callback<JsonElement>() {
+//            @Override
+//            public void onResponse(Call<JsonElement> call, Response<JsonElement> response) {
+//                JsonArray result = response.body().getAsJsonArray();
+//                ArrayList<Contact> contacts = new ArrayList<Contact>();
+//                for (int i = 0; i < result.size(); i++) {
+//                    try {
+////                        JSONObject object = response.getJSONObject(i);
+//                        JsonObject object = result.get(i).getAsJsonObject();
+////                        String part = object.getString("PART").toString().trim();
+//                        String part = object.get("PART").getAsString().trim();
+//                        if (part.equals("null")) part = "";
+//                        String dpart = object.get("DPART").getAsString().trim();
+//                        if (dpart.equals("null")) dpart = "";
+//                        String name = object.get("NAME").getAsString().trim();
+//                        if (name.equals("null")) name = "";
+//                        String phone = object.get("PHONE").getAsString().trim();
+//                        if (phone.equals("null")) phone = "";
+//                        String position = object.get("POSITION").getAsString().trim();
+//                        if (position.equals("null")) position = "";
+//                        Contact contact = new Contact();
+//                        contact.setData(0, part, dpart, position, name, "", phone, "", 0);
+//                        contacts.add(contact);
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//
+//                    if(i==result.size()-1){
+//                        dbHelper.delete();
+//                        dbHelper.insertArr(contacts);
+//
+//                        contacts = dbHelper.getPartC();
+//                        main_rv.setAdapter(contactAdapter);
+//                        contactAdapter = new ContactAdapter(MainActivity.this, contacts);
+//                        main_rv.setItemAnimator(new DefaultItemAnimator());
+//                        actionbar_tv_title.setText(R.string.app_name);
+//                        rv_level = 0;
+//                        if (actionbar_et_search.isFocused()) {
+//                            actionbar_et_search.clearFocus();
+//                        }
+//
+//                        progressDialog.dismiss();
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<JsonElement> call, Throwable t) {
+//                progressDialog.dismiss();
+//            }
+//        });
 
 
 //        restClient = new AsyncHttpClient();
@@ -411,7 +505,8 @@ public class MainActivity extends AppCompatActivity {
 //                    MainActivity.actionbar_tv_title.setText("검색");
                 } else {
                     main_rv.removeAllViews();
-                    String part = actionbar_tv_title.getText().toString();
+                    if (singleton == null) singleton = Singleton.getInstance(MainActivity.this);
+                    String part = singleton.getCurrentPart();
                     ArrayList<Contact> contacts = dbHelper.searchC(keyword, part);
 
                     ContactAdapter contactAdapter = new ContactAdapter(getApplication(), contacts);

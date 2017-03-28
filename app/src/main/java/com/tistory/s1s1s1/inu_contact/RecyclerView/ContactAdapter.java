@@ -26,6 +26,7 @@ import android.widget.TextView;
 import com.tistory.s1s1s1.inu_contact.Contact;
 import com.tistory.s1s1s1.inu_contact.MainActivity;
 import com.tistory.s1s1s1.inu_contact.R;
+import com.tistory.s1s1s1.inu_contact.Singleton;
 
 import java.util.ArrayList;
 
@@ -34,6 +35,7 @@ import static android.view.View.GONE;
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHolder> {
     Context mContext;
     ArrayList<Contact> Contacts;
+    Singleton singleton;
 
     public ContactAdapter(Context c, ArrayList<Contact> Contacts) {
         this.mContext = c;
@@ -79,6 +81,8 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
                     MainActivity.main_rv.setAdapter(ContactAdapter);
                     MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
                     MainActivity.rv_level=1;
+                    if(singleton==null) singleton = Singleton.getInstance(mContext);
+                    singleton.CURRENT_PART = part;
 //                    MainActivity.actionbar_et_search.setText("");
                 }
             });
