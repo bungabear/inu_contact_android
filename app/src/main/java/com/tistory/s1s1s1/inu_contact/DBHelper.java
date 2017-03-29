@@ -69,6 +69,7 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT * FROM CONTACT", null);
         int cnt = cursor.getCount();
         db.close();
+        cursor.close();
         if(cursor==null) return 0;
         else return cnt;
     }
@@ -91,6 +92,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
             contacts.add(contact);
         }
+        cursor.close();
         return contacts;
     }
 
@@ -104,6 +106,7 @@ public class DBHelper extends SQLiteOpenHelper {
             parts.add(part);
         }
         db.close();
+        cursor.close();
         return parts;
     }
 
@@ -118,6 +121,7 @@ public class DBHelper extends SQLiteOpenHelper {
             parts.add(contact);
         }
         db.close();
+        cursor.close();
         return parts;
     }
 
@@ -131,6 +135,7 @@ public class DBHelper extends SQLiteOpenHelper {
             contact.setData(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6), cursor.getString(7), cursor.getInt(8));
             contacts.add(contact);
         }
+        cursor.close();
         db.close();
         return contacts;
     }
@@ -145,6 +150,7 @@ public class DBHelper extends SQLiteOpenHelper {
             contact.setPart(cursor.getString(0));
             parts.add(contact);
         }
+        cursor.close();
         db.close();
         return parts;
     }
@@ -160,6 +166,7 @@ public class DBHelper extends SQLiteOpenHelper {
             contacts.add(contact);
         }
         db.close();
+        cursor.close();
         return contacts;
     }
 
@@ -175,6 +182,7 @@ public class DBHelper extends SQLiteOpenHelper {
             contacts.add(contact);
         }
         db.close();
+        cursor.close();
         return contacts;
     }
 }
