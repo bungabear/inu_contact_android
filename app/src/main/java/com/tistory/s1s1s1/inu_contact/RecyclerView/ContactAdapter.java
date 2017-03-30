@@ -57,7 +57,6 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
             holder.contact_item_tv_dpart.setVisibility(View.GONE);
             holder.contact_item_tv_name.setText(Contact.getPart());
             holder.contact_item_tv_number.setVisibility(View.GONE);
-//            holder.contact_item_tv_email.setVisibility(View.INVISIBLE);
             holder.contact_item_iv_call.setVisibility(GONE);
             holder.contact_item_rl.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -83,50 +82,22 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
                     MainActivity.rv_level=1;
                     if(singleton==null) singleton = Singleton.getInstance(mContext);
                     singleton.CURRENT_PART = part;
-//                    MainActivity.actionbar_et_search.setText("");
                 }
             });
         } else {
             //사람
             holder.contact_item_tv_dpart.setVisibility(View.VISIBLE);
             holder.contact_item_tv_number.setVisibility(View.VISIBLE);
-//            holder.contact_item_tv_email.setVisibility(View.VISIBLE);
             holder.contact_item_iv_call.setVisibility(View.VISIBLE);
             holder.contact_item_tv_dpart.setText(Contact.getDpart() + " / " + Contact.getPosition());
             holder.contact_item_tv_name.setText(Contact.getName());
             holder.contact_item_tv_number.setText(Contact.getPhone());
-//            holder.contact_item_tv_email.setText(Contact.getEmail());
             if (Contact.getPhone().trim().length() <= 1) {
                 holder.contact_item_iv_call.setVisibility(GONE);
-//                holder.contact_item_iv_add.setVisibility(GONE);
             }
-//            holder.contact_item_iv_add.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    String name = Contact.getName();
-//                    String number = Contact.getPhone();
-//                    String email = Contact.getEmail();
-//                    String part = Contact.getPart();
-//                    String dpart = Contact.getDpart();
-//
-//                    ArrayList <ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
-//
-//                    ops.add(ContentProviderOperation.newInsert(
-//                            ContactsContact.RawContacts.CONTENT_URI)
-//                            .withValue(ContactsContact.RawContacts.ACCOUNT_TYPE, null)
-//                            .withValue(ContactsContact.RawContacts.ACCOUNT_NAME, null)
-//                            .build());
-//
-//                    if(name!=null){
-//
-//                    }
-//                }
-//            });
             holder.contact_item_iv_call.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-//                Toast.makeText(mContext, holder.contact_item_tv_number.getText(), Toast.LENGTH_SHORT).show();
-
                     if (MainActivity.actionbar_et_search.isFocused()) {
                         MainActivity.actionbar_et_search.clearFocus();
                     }
@@ -134,7 +105,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
                     InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(MainActivity.actionbar_et_search.getWindowToken(), 0);
 
-                    AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.mContext2);
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.mContext);
                     dialog.setTitle("전화걸기").setMessage(Contact.getPart() + " / " + Contact.getName() + "(" + Contact.getPhone() + ")로 전화를 거시겠습니까?").setIcon(R.drawable.ic_call)
                             .setPositiveButton("예", new DialogInterface.OnClickListener() {
                                 @Override

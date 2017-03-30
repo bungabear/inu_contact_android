@@ -7,8 +7,8 @@ android {
         applicationId "com.tistory.s1s1s1.inu_contact"
         minSdkVersion 14
         targetSdkVersion 24
-        versionCode 6
-        versionName "3.4"
+        versionCode 7
+        versionName "3.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -31,4 +31,5 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.2.0'
     compile 'com.squareup.retrofit2:converter-gson:2.2.0'
     compile 'com.apkfuns.xprogressdialog:xprogressdialog:1.2.0'
+    compile 'org.jsoup:jsoup:1.10.2'
 }

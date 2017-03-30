@@ -1,9 +1,6 @@
 package com.tistory.s1s1s1.inu_contact;
 
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.view.Gravity;
-import android.view.WindowManager;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -19,6 +16,7 @@ public class Singleton {
     private static RetroService retroService;
 
     private static final String BASE_URL = "";
+    private static final int DB_VERSION = 1;
 
     public static String CURRENT_PART = "";
 
@@ -52,13 +50,6 @@ public class Singleton {
 
     public static String getCurrentPart() { return CURRENT_PART; }
 
-    public static ProgressDialog Loading(Context context){
-        ProgressDialog dialog = new ProgressDialog(context);
-        dialog.getWindow().setGravity(Gravity.BOTTOM);
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        dialog.setCancelable(false);
-        dialog.setMessage("로딩 중...");
-        return dialog;
-    }
+    public static int getDbVersion() { return DB_VERSION; }
 
 }
