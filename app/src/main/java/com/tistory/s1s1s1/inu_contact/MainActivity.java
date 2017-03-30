@@ -11,6 +11,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -196,6 +197,10 @@ public class MainActivity extends AppCompatActivity {
                     alert.setTitle("새 버전");
                     // Icon for AlertDialog
                     alert.show();
+                    Button pButton = alert.getButton(DialogInterface.BUTTON_POSITIVE);
+                    Button nButton = alert.getButton(DialogInterface.BUTTON_NEGATIVE);
+                    pButton.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.colorPrimary));
+                    nButton.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.colorPrimary));
 
                 } else {
                     // 업데이트 불필요
