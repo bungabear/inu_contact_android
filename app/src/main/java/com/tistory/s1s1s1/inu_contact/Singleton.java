@@ -15,7 +15,7 @@ public class Singleton {
     private static Retrofit retrofit;
     private static RetroService retroService;
 
-    private static final String BASE_URL = "";
+    private static final String BASE_URL = ServerString.SERVER_URL;
     private static final int DB_VERSION = 1;
 
     public static String CURRENT_PART = "";
