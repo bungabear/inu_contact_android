@@ -1,12 +1,13 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.2"
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
     defaultConfig {
         applicationId "com.tistory.s1s1s1.inu_contact"
         minSdkVersion 14
-        targetSdkVersion 24
+        targetSdkVersion 27
         versionCode 8
         versionName "3.6"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -20,16 +21,21 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:24.2.1'
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:design:24.2.0'
-    compile 'gun0912.ted:tedpermission:1.0.2'
-    compile 'com.squareup.retrofit2:retrofit:2.2.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.2.0'
-    compile 'com.apkfuns.xprogressdialog:xprogressdialog:1.2.0'
-    compile 'org.jsoup:jsoup:1.10.2'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    testImplementation 'junit:junit:4.12'
+    implementation 'com.android.support:design:27.1.1'
+    implementation 'gun0912.ted:tedpermission:1.0.2'
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+    implementation 'com.apkfuns.xprogressdialog:xprogressdialog:1.2.0'
+    implementation 'org.jsoup:jsoup:1.11.2'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+}
+repositories {
+    mavenCentral()
 }

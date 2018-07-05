@@ -30,12 +30,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.apkfuns.xprogressdialog.XProgressDialog;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.gun0912.tedpermission.PermissionListener;
-import com.gun0912.tedpermission.TedPermission;
+//import com.gun0912.tedpermission.PermissionListener;
+//import com.gun0912.tedpermission.TedPermission;
+import com.tistory.s1s1s1.inu_contact.Progress.MyProgress;
 import com.tistory.s1s1s1.inu_contact.RecyclerView.ContactAdapter;
+import com.tistory.s1s1s1.inu_contact.Network.RetroAsync;
 
 import java.util.ArrayList;
 
@@ -65,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
     private Singleton singleton;
     private boolean issearch = false;
     private JsonArray result;
-    private XProgressDialog xProgressDialog;
+    private MyProgress xProgressDialog;
 
     private InputMethodManager imm;
 
@@ -106,17 +107,17 @@ public class MainActivity extends AppCompatActivity {
         bpch = new BackPressCloseHandler(this);
 
 
-        PermissionListener permissionListener = new PermissionListener() {
-            @Override
-            public void onPermissionGranted() {
-//                Toast.makeText(mContext, "권한 요청이 허가되었습니다.", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onPermissionDenied(ArrayList<String> deniedPermissions) {
-//                Toast.makeText(mContext, "권한 요청이 거부되었습니다.", Toast.LENGTH_SHORT).show();
-            }
-        };
+//        PermissionListener permissionListener = new PermissionListener() {
+//            @Override
+//            public void onPermissionGranted() {
+////                Toast.makeText(mContext, "권한 요청이 허가되었습니다.", Toast.LENGTH_SHORT).show();
+//            }
+//
+//            @Override
+//            public void onPermissionDenied(ArrayList<String> deniedPermissions) {
+////                Toast.makeText(mContext, "권한 요청이 거부되었습니다.", Toast.LENGTH_SHORT).show();
+//            }
+//        };
 
         if (networkCheck() == false) {
             AlertDialog dialog = new AlertDialog.Builder(this).create();
@@ -132,16 +133,16 @@ public class MainActivity extends AppCompatActivity {
             Button pbutton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
             pbutton.setTextColor(Color.BLACK);
         } else {
-            new TedPermission(getApplication())
-                    .setPermissionListener(permissionListener)
-//                .setRationaleMessage("앱에서 바로 통화 발신을 위해서는 권한이 필요합니다.")
-//                .setDeniedMessage("만일 권한 요청을 거부할 경우, 앱에서 바로 통화 발신이 불가합니다.\n\n[설정] > [권한]에서 권한을 허용해주세요.")
-                    .setPermissions(android.Manifest.permission.CALL_PHONE).check();
+//            new TedPermission(getApplication())
+//                    .setPermissionListener(permissionListener)
+////                .setRationaleMessage("앱에서 바로 통화 발신을 위해서는 권한이 필요합니다.")
+////                .setDeniedMessage("만일 권한 요청을 거부할 경우, 앱에서 바로 통화 발신이 불가합니다.\n\n[설정] > [권한]에서 권한을 허용해주세요.")
+//                    .setPermissions(android.Manifest.permission.CALL_PHONE).check();
 
-            if (singleton == null) singleton = Singleton.getInstance(this);
-            if (dbHelper == null) dbHelper = DBHelper.getInstance(this, singleton.getDbVersion());
+            if (singleton == null) singleton = Singleton.INSTANCE;
+            if (dbHelper == null) dbHelper = DBHelper.Companion.getInstance(this, singleton.getDB_VERSION());
 
-            xProgressDialog = new XProgressDialog(this, "로딩 중...", XProgressDialog.THEME_CIRCLE_PROGRESS);
+            xProgressDialog = new MyProgress(this, "로딩 중...");
             xProgressDialog.show();
             new VerCheck().execute();
 
@@ -156,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            storeVer = MarketVersionChecker.getMarketVersion(getPackageName());
+            storeVer = MarketVersionChecker.INSTANCE.getMarketVersion(getPackageName());
             try {
                 deviceVer = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
             } catch (PackageManager.NameNotFoundException e) {
@@ -216,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
     private void getDB() {
         if(xProgressDialog!=null && !xProgressDialog.isShowing()) xProgressDialog.show();
 
-        singleton.getRetroService().contact().enqueue(new Callback<JsonElement>() {
+        singleton.getRetrofitSerice().contact().enqueue(new Callback<JsonElement>() {
             @Override
             public void onResponse(Call<JsonElement> call, Response<JsonElement> response) {
 //                progressDialog.dismiss();
@@ -225,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
                 result = response.body().getAsJsonArray();
                 RetroAsync retroAsync = new RetroAsync(MainActivity.this, xProgressDialog, result, dbHelper);
                 retroAsync.execute();
-                Log.d("TAG", "Success, count: " + dbHelper.getDBCount());
+                Log.d("TAG", "Success, count: " + dbHelper.getDbCount());
             }
 
             @Override
@@ -277,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
                     actionbar_tv_title.setText(R.string.app_name);
                     break;
                 case 1:
-                    final String part = singleton.getCurrentPart();
+                    final String part = singleton.getCURRENT_PART();
                     contactAdapter = new ContactAdapter(this, dbHelper.getContact(part));
                     actionbar_tv_title.setText(part);
                     break;
@@ -330,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
                 } else {
                     main_rv.removeAllViews();
-                    String part = singleton.getCurrentPart();
+                    String part = singleton.getCURRENT_PART();
                     ArrayList<Contact> contacts = dbHelper.searchContact(keyword, part);
 
                     ContactAdapter contactAdapter = new ContactAdapter(MainActivity.this, contacts);
@@ -356,7 +357,7 @@ public class MainActivity extends AppCompatActivity {
                         actionbar_tv_title.setText(R.string.app_name);
                     } else {
                         main_rv.removeAllViews();
-                        String part = singleton.getCurrentPart();
+                        String part = singleton.getCURRENT_PART();
                         ArrayList<Contact> contacts = dbHelper.getContact(part);
                         ContactAdapter contactAdapter = new ContactAdapter(MainActivity.this, contacts);
                         main_rv.setItemAnimator(new DefaultItemAnimator());
