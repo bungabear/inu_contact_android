@@ -6,7 +6,7 @@ android {
     buildToolsVersion "27.0.3"
     defaultConfig {
         applicationId "com.tistory.s1s1s1.inu_contact"
-        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion 27
         versionCode 8
         versionName "3.6"

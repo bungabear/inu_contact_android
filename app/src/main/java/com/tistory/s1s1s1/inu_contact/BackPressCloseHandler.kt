@@ -1,9 +1,5 @@
 package com.tistory.s1s1s1.inu_contact
 
-/**
- * Created by Administrator on 2016-12-24.
- */
-
 import android.app.Activity
 import android.widget.Toast
 

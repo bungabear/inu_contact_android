@@ -15,6 +15,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -46,10 +47,11 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-//    public static Context mContext;
+    public static Boolean versionCheked = false;
     public static Context mContext;
     public static DBHelper dbHelper;
     public static RecyclerView main_rv;
+    private Context context = this;
 
     public static int rv_level; //현재 리사이클러뷰의 레벨
 
@@ -76,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 //        mContext = getApplication();
-        mContext = MainActivity.this;
+        mContext = context;
 
         if(imm == null) imm = (InputMethodManager) getApplication().getSystemService(Context.INPUT_METHOD_SERVICE);
 
@@ -104,6 +106,8 @@ public class MainActivity extends AppCompatActivity {
 
         main_rv = (RecyclerView) findViewById(R.id.main_rv);
         main_rv.setLayoutManager(new LinearLayoutManager(this));
+        main_rv.addItemDecoration(new DividerItemDecoration(context,  LinearLayoutManager.VERTICAL));
+
         bpch = new BackPressCloseHandler(this);
 
 
@@ -119,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        };
 
-        if (networkCheck() == false) {
+        if (!networkCheck()) {
             AlertDialog dialog = new AlertDialog.Builder(this).create();
             dialog.setMessage(getString(R.string.no_internet));
             dialog.setButton(AlertDialog.BUTTON_POSITIVE, "확인", new DialogInterface.OnClickListener() {
@@ -142,9 +146,9 @@ public class MainActivity extends AppCompatActivity {
             if (singleton == null) singleton = Singleton.INSTANCE;
             if (dbHelper == null) dbHelper = DBHelper.Companion.getInstance(this, singleton.getDB_VERSION());
 
-            xProgressDialog = new MyProgress(this, "로딩 중...");
-            xProgressDialog.show();
+
             new VerCheck().execute();
+            xProgressDialog = new MyProgress(MainActivity.this, "로딩중...");
 
             //get DB
 //            getDB();
@@ -152,8 +156,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+//        if(!versionCheked && networkCheck()){
+//            versionCheked = true;
+//            new VerCheck().execute();
+//        }
+    }
+
     private class VerCheck extends AsyncTask<Void, Void, Void> {
         String storeVer, deviceVer;
+        // FIXME 액티비티 로딩이 되지 않았다고 팝업윈도우가 작동하지 않음.
+//        MyProgress dialog;
+
+        @Override
+        protected void onPreExecute() {
+//            dialog = new MyProgress(MainActivity.this, "버전정보 확인 중...");
+//            dialog.show();
+        }
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -168,11 +189,12 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
+//            dialog.dismiss();
             try {
                 if (storeVer.compareTo(deviceVer) > 0) {
                     xProgressDialog.dismiss();
                     android.app.AlertDialog.Builder alt_bld = new android.app.AlertDialog.Builder(
-                            MainActivity.this);
+                            context);
                     alt_bld.setMessage("새 버전이 나왔습니다. 업데이트 하시겠습니까?")
                             .setCancelable(false)
                             .setPositiveButton("업데이트 하러 가기",
@@ -200,8 +222,8 @@ public class MainActivity extends AppCompatActivity {
                     alert.show();
                     Button pButton = alert.getButton(DialogInterface.BUTTON_POSITIVE);
                     Button nButton = alert.getButton(DialogInterface.BUTTON_NEGATIVE);
-                    pButton.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.colorPrimary));
-                    nButton.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.colorPrimary));
+                    pButton.setTextColor(ContextCompat.getColor(context, R.color.colorPrimary));
+                    nButton.setTextColor(ContextCompat.getColor(context, R.color.colorPrimary));
 
                 } else {
                     // 업데이트 불필요
@@ -223,8 +245,10 @@ public class MainActivity extends AppCompatActivity {
 //                progressDialog.dismiss();
                 Log.d("TAG", "RETROFIT SUCCESSED");
                 dbHelper.delete();
+//                Log.d("TAG", response.toString());
                 result = response.body().getAsJsonArray();
-                RetroAsync retroAsync = new RetroAsync(MainActivity.this, xProgressDialog, result, dbHelper);
+//                Log.d("TAG", dbHelper.toString());
+                RetroAsync retroAsync = new RetroAsync(context, xProgressDialog, result, dbHelper);
                 retroAsync.execute();
                 Log.d("TAG", "Success, count: " + dbHelper.getDbCount());
             }
@@ -233,7 +257,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Call<JsonElement> call, Throwable t) {
                 Log.d("TAG", "RETROFIT FAILED");
                 xProgressDialog.dismiss();
-                Toast.makeText(MainActivity.this, "데이터 업데이트에 실패하였습니다.\n새로고침을 눌러주세요.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "데이터 업데이트에 실패하였습니다.\n새로고침을 눌러주세요.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -274,16 +298,16 @@ public class MainActivity extends AppCompatActivity {
             actionbar_et_search.setText("");
             switch (rv_level){
                 case 0:
-                    contactAdapter = new ContactAdapter(this, dbHelper.getPart());
+                    contactAdapter = new ContactAdapter(dbHelper.getPart());
                     actionbar_tv_title.setText(R.string.app_name);
                     break;
                 case 1:
                     final String part = singleton.getCURRENT_PART();
-                    contactAdapter = new ContactAdapter(this, dbHelper.getContact(part));
+                    contactAdapter = new ContactAdapter(dbHelper.getContact(part));
                     actionbar_tv_title.setText(part);
                     break;
                 default:
-                    contactAdapter = new ContactAdapter(this, null);
+                    contactAdapter = new ContactAdapter(null);
             }
             main_rv.setAdapter(contactAdapter);
             main_rv.setItemAnimator(new DefaultItemAnimator());
@@ -296,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case 1:
                     main_rv.removeAllViews();
-                    contactAdapter = new ContactAdapter(this, dbHelper.getPart());
+                    contactAdapter = new ContactAdapter(dbHelper.getPart());
                     actionbar_tv_title.setText(R.string.app_name);
                     rv_level = 0;
                     main_rv.setAdapter(contactAdapter);
@@ -324,8 +348,10 @@ public class MainActivity extends AppCompatActivity {
                     main_rv.removeAllViews();
                     ArrayList<Contact> parts = dbHelper.searchPart(keyword);
                     ArrayList<Contact> contacts = dbHelper.searchContact(keyword);
+                    ArrayList<Contact> num = dbHelper.searchNumber(keyword);
                     parts.addAll(contacts);
-                    ContactAdapter contactAdapter = new ContactAdapter(MainActivity.this, parts);
+                    parts.addAll(num);
+                    ContactAdapter contactAdapter = new ContactAdapter(parts);
                     main_rv.setItemAnimator(new DefaultItemAnimator());
                     main_rv.setAdapter(contactAdapter);
                     MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
@@ -333,8 +359,9 @@ public class MainActivity extends AppCompatActivity {
                     main_rv.removeAllViews();
                     String part = singleton.getCURRENT_PART();
                     ArrayList<Contact> contacts = dbHelper.searchContact(keyword, part);
-
-                    ContactAdapter contactAdapter = new ContactAdapter(MainActivity.this, contacts);
+                    ArrayList<Contact> num = dbHelper.searchNumber(keyword, part);
+                    contacts.addAll(num);
+                    ContactAdapter contactAdapter = new ContactAdapter(contacts);
                     main_rv.setItemAnimator(new DefaultItemAnimator());
                     main_rv.setAdapter(contactAdapter);
                     MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
@@ -348,7 +375,7 @@ public class MainActivity extends AppCompatActivity {
                     if (rv_level == 0){
                         main_rv.removeAllViews();
                         ArrayList<Contact> parts = dbHelper.getPart();
-                        ContactAdapter contactAdapter = new ContactAdapter(MainActivity.this, parts);
+                        ContactAdapter contactAdapter = new ContactAdapter(parts);
                         main_rv.setItemAnimator(new DefaultItemAnimator());
                         main_rv.setAdapter(contactAdapter);
                         MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
@@ -359,7 +386,7 @@ public class MainActivity extends AppCompatActivity {
                         main_rv.removeAllViews();
                         String part = singleton.getCURRENT_PART();
                         ArrayList<Contact> contacts = dbHelper.getContact(part);
-                        ContactAdapter contactAdapter = new ContactAdapter(MainActivity.this, contacts);
+                        ContactAdapter contactAdapter = new ContactAdapter(contacts);
                         main_rv.setItemAnimator(new DefaultItemAnimator());
                         main_rv.setAdapter(contactAdapter);
                         MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
@@ -427,7 +454,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     break;
                 case R.id.actionbar_iv_info:
-                    Intent intent = new Intent(MainActivity.this, InfoActivity.class);
+                    Intent intent = new Intent(context, InfoActivity.class);
                     startActivity(intent);
                     break;
             }

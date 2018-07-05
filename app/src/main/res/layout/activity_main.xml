@@ -28,7 +28,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/main_rv"
-        android:layout_below="@+id/actionbar"></android.support.v7.widget.RecyclerView>
+        android:layout_below="@+id/actionbar"
+        tools:listitem="@layout/group_item">
+
+    </android.support.v7.widget.RecyclerView>
 
     <!--<TextView-->
         <!--android:text="검색 결과가 없습니다"-->

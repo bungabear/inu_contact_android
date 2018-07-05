@@ -1,17 +1,12 @@
 package com.tistory.s1s1s1.inu_contact
 
 import android.content.Context
-import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
 import com.google.gson.JsonObject
 
 import java.util.ArrayList
-
-/**
- * Created by Administrator on 2016-12-23.
- */
 
 class DBHelper private constructor(context: Context, version: Int) : SQLiteOpenHelper(context, "contact.db", null, version) {
 
@@ -79,26 +74,27 @@ class DBHelper private constructor(context: Context, version: Int) : SQLiteOpenH
         onCreate(db)
     }
 
-    fun insert(`object`: JsonObject) {
+    fun insert(obj: JsonObject) {
         var part = ""
-        if (!`object`.get("PART").isJsonNull) {
-            part = `object`.get("PART").asString
+        if (!obj.get("PART").isJsonNull) {
+            part = obj.get("PART").asString
         }
         var dpart = ""
-        if (!`object`.get("DPART").isJsonNull) {
-            dpart = `object`.get("DPART").asString
+        if (!obj.get("DPART").isJsonNull) {
+            dpart = obj.get("DPART").asString
         }
         var position = ""
-        if (!`object`.get("POSITION").isJsonNull) {
-            position = `object`.get("POSITION").asString
+        if (!obj.get("POSITION").isJsonNull) {
+            position = obj.get("POSITION").asString
         }
         var name = ""
-        if (!`object`.get("NAME").isJsonNull) {
-            name = `object`.get("NAME").asString
+        if (!obj.get("NAME").isJsonNull) {
+            name = obj.get("NAME").asString
         }
         var phone = ""
-        if (!`object`.get("PHONE").isJsonNull) {
-            phone = `object`.get("PHONE").asString
+        if (!obj.get("PHONE").isJsonNull) {
+            phone = obj.get("PHONE").asString
+            phone = phone.replace("-","")
         }
         val task = ""
         val email = ""
@@ -153,35 +149,11 @@ class DBHelper private constructor(context: Context, version: Int) : SQLiteOpenH
         return parts
     }
 
-    //    public ArrayList<Contact> searchP2(String p){
-    ////        SQLiteDatabase db = getReadableDatabase();
-    //        Cursor cursor = readable.rawQuery("SELECT DISTINCT PART FROM CONTACT WHERE PART LIKE '%"+p+"%'", null);
-    //        ArrayList<Contact> parts = new ArrayList<>();
-    //        Contact contact;
-    //        while(cursor.moveToNext()){
-    //            contact = new Contact();
-    //            contact.setPart(cursor.getString(0));
-    //            parts.add(contact);
-    //        }
-    //        cursor.close();
-    //        return parts;
-    //    }
-
-    fun searchContact(person: String): ArrayList<Contact> {
-        val cursor = readable!!.rawQuery("SELECT * FROM CONTACT WHERE NAME LIKE'%$person%'", null)
-        val contacts = ArrayList<Contact>()
-        var contact: Contact
-        while (cursor.moveToNext()) {
-            contact = Contact(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6), cursor.getString(7), cursor.getInt(8))
-            contacts.add(contact)
-        }
-        cursor.close()
-        return contacts
-    }
-
-    fun searchContact(person: String, part: String): ArrayList<Contact> {
+    @JvmOverloads
+    fun searchContact(person: String, part :String = ""): ArrayList<Contact> {
         //부서 내부에서 검색할때
-        val cursor = readable!!.rawQuery("SELECT * FROM CONTACT WHERE PART='$part' AND NAME LIKE'%$person%'", null)
+        val query = if(part == "") "SELECT * FROM CONTACT WHERE NAME LIKE'%$person%'" else "SELECT * FROM CONTACT WHERE PART='$part' AND NAME LIKE'%$person%'"
+        val cursor = readable!!.rawQuery(query, null)
         val contacts = ArrayList<Contact>()
         var contact: Contact
         while (cursor.moveToNext()) {
@@ -192,5 +164,19 @@ class DBHelper private constructor(context: Context, version: Int) : SQLiteOpenH
         return contacts
     }
 
+    @JvmOverloads
+    fun searchNumber(phone: String, part :String = ""): ArrayList<Contact> {
+        val str = phone.replace("-", "")
+        val query = if(part == "") "SELECT * FROM CONTACT WHERE phone LIKE'%$str%'" else "SELECT * FROM CONTACT WHERE PART='$part' AND phone LIKE'%$str%'"
+        val cursor = readable!!.rawQuery(query, null)
+        val contacts = ArrayList<Contact>()
+        var contact: Contact
+        while (cursor.moveToNext()) {
+            contact = Contact(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6), cursor.getString(7), cursor.getInt(8))
+            contacts.add(contact)
+        }
+        cursor.close()
+        return contacts
+    }
 
 }

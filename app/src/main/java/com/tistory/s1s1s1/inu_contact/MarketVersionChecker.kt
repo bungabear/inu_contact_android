@@ -1,19 +1,12 @@
 package com.tistory.s1s1s1.inu_contact
 
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
-import org.jsoup.select.Elements
-
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 
-/**
- * Created by seonilkim on 2017. 3. 30..
- */
 
 object MarketVersionChecker {
     fun getMarketVersion(packageName: String): String? {

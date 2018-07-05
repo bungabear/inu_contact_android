@@ -3,46 +3,6 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!--<RelativeLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="60dp"-->
-        <!--android:minHeight="?attr/actionBarSize"-->
-        <!--android:background="@color/colorPrimary">-->
-        <!--<TextView-->
-            <!--android:layout_marginLeft="20dp"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_centerVertical="true"-->
-            <!--android:textColor="#ffffff"-->
-            <!--android:text="어플리케이션 정보"-->
-            <!--android:textStyle="bold"-->
-            <!--android:textSize="20dp"-->
-            <!--android:id="@+id/actionbar_tv_title"/>-->
-
-        <!--<ImageView-->
-            <!--android:layout_marginRight="10dp"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_centerVertical="true"-->
-            <!--android:layout_alignParentRight="true"-->
-            <!--android:src="@drawable/ic_info"-->
-            <!--android:id="@+id/actionbar_iv_info"/>-->
-
-        <!--<ImageView-->
-            <!--android:layout_toLeftOf="@id/actionbar_iv_info"-->
-            <!--android:layout_marginRight="10dp"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_centerVertical="true"-->
-            <!--android:src="@drawable/ic_refresh"-->
-            <!--android:id="@+id/actionbar_iv_refresh"/>-->
-
-    <!--</RelativeLayout>-->
-    <!--<View-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="5dp"-->
-        <!--android:background="@drawable/drop_shadow"/>-->
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -192,7 +152,7 @@
                             android:layout_height="0dp"
                             android:layout_weight="2"
                             android:gravity="center_horizontal|top"
-                            android:text="김선일"
+                            android:text="김선일, 손민재"
                             android:textColor="#000000"/>
 
                     </LinearLayout>

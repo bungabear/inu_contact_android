@@ -17,40 +17,32 @@ import com.tistory.s1s1s1.inu_contact.Progress.MyProgress
 import com.tistory.s1s1s1.inu_contact.R
 import java.lang.ref.WeakReference
 
-
-/**
- * Created by seonilkim on 2017. 3. 23..
- */
-
 class RetroAsync
                 (private val context: Context,
                  private val xProgressDialog: MyProgress,
                  val result: JsonArray,
-                 private val dbHelper: DBHelper) : AsyncTask<Void, Void, Void>() {
+                 private val dbHelper: DBHelper) : AsyncTask<Unit, Unit, Unit>() {
 
-    override fun onPreExecute() {
-        //        if(singleton == null) singleton.getInstance(context);
-    }
-
-    override fun doInBackground(vararg voids: Void): Void? {
+    override fun doInBackground(vararg voids: Unit): Unit? {
         var json: JsonObject
-        for (i in 0 until result!!.size()) {
-            json = result!!.get(i).asJsonObject
+        for (i in 0 until result.size()) {
+            json = result.get(i).asJsonObject
             dbHelper.insert(json)
         }
 
         return null
     }
 
-    override fun onPostExecute(aVoid: Void) {
-        main_rv.adapter = ContactAdapter(context, dbHelper.part)
+    override fun onPostExecute(aVoid: Unit?) {
+        main_rv.adapter = ContactAdapter(dbHelper.part)
         main_rv.itemAnimator = DefaultItemAnimator()
         actionbar_tv_title.setText(R.string.app_name)
+        main_rv.adapter.notifyDataSetChanged()
         rv_level = 0
         if (actionbar_et_search.isFocused) {
             actionbar_et_search.clearFocus()
         }
-        xProgressDialog!!.dismiss()
+        xProgressDialog.dismiss()
     }
 }
 

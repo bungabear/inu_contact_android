@@ -6,20 +6,16 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.TextView
 
-/**
- * Created by Administrator on 2016-12-25.
- */
 
 class InfoActivity : AppCompatActivity() {
 
-    val tvVer = findViewById<TextView>(R.id.tv_ver)
-    var pi: PackageInfo? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_info)
-
-
+        val tvVer = findViewById<TextView>(R.id.tv_ver)
+        var pi: PackageInfo? = null
         try {
             pi = packageManager.getPackageInfo(packageName, 0)
         } catch (e: Exception) {
