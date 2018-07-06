@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView actionbar_iv_refresh;
     private ImageView actionbar_iv_search;
     private ImageView actionbar_iv_info;
+    private ImageView actionbar_iv_map;
 
 
     private Singleton singleton;
@@ -103,6 +104,8 @@ public class MainActivity extends AppCompatActivity {
         actionbar_iv_search.setOnClickListener(mClickListener);
         actionbar_iv_info = (ImageView) findViewById(R.id.actionbar_iv_info);
         actionbar_iv_info.setOnClickListener(mClickListener);
+        actionbar_iv_map = findViewById(R.id.actionbar_iv_map);
+        actionbar_iv_map.setOnClickListener(mClickListener);
 
         main_rv = (RecyclerView) findViewById(R.id.main_rv);
         main_rv.setLayoutManager(new LinearLayoutManager(this));
@@ -454,8 +457,10 @@ public class MainActivity extends AppCompatActivity {
                     }
                     break;
                 case R.id.actionbar_iv_info:
-                    Intent intent = new Intent(context, InfoActivity.class);
-                    startActivity(intent);
+                    startActivity(new Intent(context, InfoActivity.class));
+                    break;
+                case R.id.actionbar_iv_map:
+                    startActivity(new Intent(context, MapActivity.class));
                     break;
             }
         }

@@ -9,7 +9,7 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:minHeight="?attr/actionBarSize"
+        android:minHeight="?android:attr/actionBarSize"
         android:background="@color/colorPrimary">
         <TextView
             android:layout_marginLeft="20dp"
@@ -23,6 +23,14 @@
             android:textStyle="bold"
             android:textSize="20dp"
             android:id="@+id/actionbar_tv_title"/>
+
+        <ImageView
+            android:layout_marginRight="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/ic_baseline_map_24px"
+            android:id="@+id/actionbar_iv_map"/>
 
         <ImageView
             android:layout_marginRight="10dp"
