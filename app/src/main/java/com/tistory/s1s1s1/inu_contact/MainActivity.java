@@ -33,17 +33,18 @@ import android.widget.Toast;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-//import com.gun0912.tedpermission.PermissionListener;
-//import com.gun0912.tedpermission.TedPermission;
+import com.tistory.s1s1s1.inu_contact.Network.RetroAsync;
 import com.tistory.s1s1s1.inu_contact.Progress.MyProgress;
 import com.tistory.s1s1s1.inu_contact.RecyclerView.ContactAdapter;
-import com.tistory.s1s1s1.inu_contact.Network.RetroAsync;
 
 import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+//import com.gun0912.tedpermission.PermissionListener;
+//import com.gun0912.tedpermission.TedPermission;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -242,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
     private void getDB() {
         if(xProgressDialog!=null && !xProgressDialog.isShowing()) xProgressDialog.show();
 
-        singleton.getRetrofitSerice().contact().enqueue(new Callback<JsonElement>() {
+        singleton.getRetrofitService().contact().enqueue(new Callback<JsonElement>() {
             @Override
             public void onResponse(Call<JsonElement> call, Response<JsonElement> response) {
 //                progressDialog.dismiss();
@@ -251,7 +252,7 @@ public class MainActivity extends AppCompatActivity {
 //                Log.d("TAG", response.toString());
                 result = response.body().getAsJsonArray();
 //                Log.d("TAG", dbHelper.toString());
-                RetroAsync retroAsync = new RetroAsync(context, xProgressDialog, result, dbHelper);
+                RetroAsync retroAsync = new RetroAsync(xProgressDialog, result, dbHelper);
                 retroAsync.execute();
                 Log.d("TAG", "Success, count: " + dbHelper.getDbCount());
             }

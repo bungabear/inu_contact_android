@@ -3,10 +3,8 @@ package com.tistory.s1s1s1.inu_contact
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-
 import com.google.gson.JsonObject
-
-import java.util.ArrayList
+import java.util.*
 
 class DBHelper private constructor(context: Context, version: Int) : SQLiteOpenHelper(context, "contact.db", null, version) {
 
@@ -39,10 +37,7 @@ class DBHelper private constructor(context: Context, version: Int) : SQLiteOpenH
             val cursor = readable!!.rawQuery("SELECT * FROM CONTACT", null)
             val cnt = cursor!!.count
             cursor.close()
-            return if (cursor == null)
-                0
-            else
-                cnt
+            return cnt
         }
 
     val part: ArrayList<Contact>
@@ -101,9 +96,9 @@ class DBHelper private constructor(context: Context, version: Int) : SQLiteOpenH
         writable!!.execSQL("insert into $TABLE_ID values(null, '$part', '$dpart', '$position', '$name', '$task', '$phone', '$email', 0);")
     }
 
-    fun drop() {
-        writable!!.execSQL("DROP TABLE CONTACT")
-    }
+//    fun drop() {
+//        writable!!.execSQL("DROP TABLE CONTACT")
+//    }
 
     fun delete() {
         writable!!.execSQL("DELETE FROM CONTACT")

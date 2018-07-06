@@ -27,6 +27,7 @@
 
         <activity android:name="com.tistory.s1s1s1.inu_contact.InfoActivity"/>
         <activity android:name="com.tistory.s1s1s1.inu_contact.MapActivity"/>
+        <service android:name="com.tistory.s1s1s1.inu_contact.Network.GPS"/>
     </application>
 
 </manifest>
