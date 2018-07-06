@@ -17,21 +17,21 @@ class GPS(private val mContext: Context) : Service(), LocationListener {
 
     // 현재 GPS 사용유무
     private var isGPSEnabled = false
-
     // 네트워크 사용유무
     private var isNetworkEnabled = false
-
     // GPS 상태값
-    /**
-     * GPS 나 wife 정보가 켜져있는지 확인합니다.
-     */
     var isGetLocation = false
         internal set
-
     private var location: Location? = null
-    private var lat: Double = 0.toDouble() // 위도
-    private var lon: Double = 0.toDouble() // 경도
+    private var lat: Double = .0 // 위도
+    private var lon: Double = .0 // 경도
     private var locationManager: LocationManager? = null
+
+    val latitude: Double
+        get() = if(location != null) location!!.latitude else lat
+
+    val longitude: Double
+        get() = if(location != null) location!!.longitude else lon
 
     @TargetApi(23)
     fun getLocation(): Location? {
@@ -40,7 +40,6 @@ class GPS(private val mContext: Context) : Service(), LocationListener {
                         mContext, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(
                         mContext, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
             return null
         }
 
@@ -66,7 +65,6 @@ class GPS(private val mContext: Context) : Service(), LocationListener {
                             LocationManager.NETWORK_PROVIDER,
                             MIN_TIME_BW_UPDATES,
                             MIN_DISTANCE_CHANGE_FOR_UPDATES.toFloat(), this)
-
                     if (locationManager != null) {
                         location = locationManager!!
                                 .getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
@@ -77,7 +75,6 @@ class GPS(private val mContext: Context) : Service(), LocationListener {
                         }
                     }
                 }
-
                 if (isGPSEnabled) {
                     if (location == null) {
                         locationManager!!.requestLocationUpdates(
@@ -130,7 +127,5 @@ class GPS(private val mContext: Context) : Service(), LocationListener {
         // 최소 GPS 정보 업데이트 시간 밀리세컨이므로 1분
         private val MIN_TIME_BW_UPDATES = (1000 * 60 * 1).toLong()
     }
-
-
 }
 

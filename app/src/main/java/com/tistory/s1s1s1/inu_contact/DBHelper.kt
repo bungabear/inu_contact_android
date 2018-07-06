@@ -93,6 +93,7 @@ class DBHelper private constructor(context: Context, version: Int) : SQLiteOpenH
         }
         val task = ""
         val email = ""
+        if(part == "") part ="기타"
         writable!!.execSQL("insert into $TABLE_ID values(null, '$part', '$dpart', '$position', '$name', '$task', '$phone', '$email', 0);")
     }
 
