@@ -17,15 +17,22 @@ class GPS(private val mContext: Context) : Service(), LocationListener {
 
     // 현재 GPS 사용유무
     private var isGPSEnabled = false
+
     // 네트워크 사용유무
     private var isNetworkEnabled = false
+
     // GPS 상태값
     var isGetLocation = false
         internal set
+
     private var location: Location? = null
     private var lat: Double = .0 // 위도
     private var lon: Double = .0 // 경도
     private var locationManager: LocationManager? = null
+
+    init{
+        getLocation()
+    }
 
     val latitude: Double
         get() = if(location != null) location!!.latitude else lat

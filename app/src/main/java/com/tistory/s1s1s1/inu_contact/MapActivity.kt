@@ -4,8 +4,8 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
@@ -18,16 +18,29 @@ import net.daum.mf.map.api.MapView
 class MapActivity : AppCompatActivity() {
 
     private val mapView : MapView by lazy { MapView(this) }
+    private val defaultMaker = ArrayList<MapPOIItem>()
+    private var isDefaultMakerShowing = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
-
-        val mapViewContainer = findViewById<View>(R.id.map_view) as ViewGroup
+        val btn = findViewById<Button>(R.id.btn_marker)
+        // FIXME 마커 삭제후 다시 추가가 안됨.
+        btn.setOnClickListener {
+            val array = arrayOfNulls<MapPOIItem>(defaultMaker.size)
+            if(isDefaultMakerShowing) {
+                mapView.removePOIItems(defaultMaker.toArray(array))
+                isDefaultMakerShowing = false
+            } else {
+                mapView.addPOIItems(defaultMaker.toArray(array))
+                isDefaultMakerShowing = true
+            }
+        }
+        val mapViewContainer = findViewById<ViewGroup>(R.id.map_view)
         mapViewContainer.addView(mapView)
         mapView.setMapViewEventListener(eventListener)
 
-        mapView.setShowCurrentLocationMarker(true)
+
         mapView.setZoomLevel(9, false)
 
 
@@ -44,10 +57,12 @@ class MapActivity : AppCompatActivity() {
                             marker.markerType = MapPOIItem.MarkerType.CustomImage // 기본으로 제공하는 BluePin 마커 모양.
                             marker.customImageBitmap = resource
                             marker.mapPoint = MapPoint.mapPointWithGeoCoord(json.asJsonObject.get("lat").asDouble, json.asJsonObject.get("log").asDouble)
-                            mapView.addPOIItem(marker)
+                            defaultMaker.add(marker)
+//                            mapView.addPOIItem(marker)
                         }
                     })
         }
+//        isDefaultMakerShowing = true
 
         // 학교 중앙 좌표 37.37545394897461 126.63258361816406
         getMyLocation()!!.run {
@@ -75,6 +90,9 @@ class MapActivity : AppCompatActivity() {
 
         override fun onMapViewInitialized(p0: MapView?) {
             mapView.setZoomLevel(2, true)
+            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithMarkerHeadingWithoutMapMoving)
+            mapView.setShowCurrentLocationMarker(true)
+            mapView.setDefaultCurrentLocationMarker()
         }
 
         override fun onMapViewDragStarted(p0: MapView?, p1: MapPoint?) {
