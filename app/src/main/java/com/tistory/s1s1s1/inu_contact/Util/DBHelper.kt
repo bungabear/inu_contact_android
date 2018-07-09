@@ -1,9 +1,14 @@
-package com.tistory.s1s1s1.inu_contact
+/*
+ * Copyright (c) 2018. Minjae Son
+ */
+
+package com.tistory.s1s1s1.inu_contact.Util
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.google.gson.JsonObject
+import com.tistory.s1s1s1.inu_contact.Contact
 import java.util.*
 
 class DBHelper private constructor(context: Context, version: Int) : SQLiteOpenHelper(context, "contact.db", null, version) {
@@ -104,21 +109,6 @@ class DBHelper private constructor(context: Context, version: Int) : SQLiteOpenH
     fun delete() {
         writable!!.execSQL("DELETE FROM CONTACT")
     }
-
-    //    public ArrayList<Contact> getPartC(){
-    ////        SQLiteDatabase db = getReadableDatabase();
-    //        Cursor cursor = readable.rawQuery("SELECT DISTINCT PART FROM CONTACT", null);
-    //        ArrayList<Contact> parts = new ArrayList<>();
-    //        Contact contact;
-    //        while(cursor.moveToNext()){
-    //            contact = new Contact();
-    //            contact.setPart(cursor.getString(0));
-    //            parts.add(contact);
-    //        }
-    ////        db.close();
-    //        cursor.close();
-    //        return parts;
-    //    }
 
     fun getContact(part: String): ArrayList<Contact> {
         val cursor = readable!!.rawQuery("SELECT * FROM CONTACT WHERE PART='$part'", null)

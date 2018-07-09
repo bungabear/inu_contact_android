@@ -17,7 +17,7 @@
         android:theme="@style/AppTheme">
         <meta-data android:name="com.kakao.sdk.AppKey" android:value="@string/map_key"/>
 
-        <activity android:name="com.tistory.s1s1s1.inu_contact.MainActivity">
+        <activity android:name="com.tistory.s1s1s1.inu_contact.Activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,8 +25,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.tistory.s1s1s1.inu_contact.InfoActivity"/>
-        <activity android:name="com.tistory.s1s1s1.inu_contact.MapActivity"/>
+        <activity android:name="com.tistory.s1s1s1.inu_contact.Activity.InfoActivity"/>
+        <activity android:name="com.tistory.s1s1s1.inu_contact.Activity.MapActivity"/>
         <service android:name="com.tistory.s1s1s1.inu_contact.Network.GPS"/>
     </application>
 

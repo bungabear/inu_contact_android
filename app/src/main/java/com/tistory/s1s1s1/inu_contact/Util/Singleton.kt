@@ -1,6 +1,11 @@
-package com.tistory.s1s1s1.inu_contact
+/*
+ * Copyright (c) 2018. Minjae Son
+ */
+
+package com.tistory.s1s1s1.inu_contact.Util
 
 import com.google.gson.JsonParser
+import com.tistory.s1s1s1.inu_contact.BASE_URL
 import com.tistory.s1s1s1.inu_contact.Network.RetroService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

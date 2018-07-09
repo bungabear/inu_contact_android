@@ -4,7 +4,7 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.tistory.s1s1s1.inu_contact.MainActivity">
+    tools:context="com.tistory.s1s1s1.inu_contact.Activity.MainActivity">
 
     <include
         android:layout_width="match_parent"

@@ -17,7 +17,10 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.tistory.s1s1s1.inu_contact.*
-import com.tistory.s1s1s1.inu_contact.MainActivity.mContext
+import com.tistory.s1s1s1.inu_contact.Activity.MainActivity
+import com.tistory.s1s1s1.inu_contact.Activity.MainActivity.mContext
+import com.tistory.s1s1s1.inu_contact.Util.Singleton
+import com.tistory.s1s1s1.inu_contact.Util.Util
 import java.util.*
 
 class ContactAdapter(private val Contacts: ArrayList<Contact>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {

@@ -1,4 +1,8 @@
-package com.tistory.s1s1s1.inu_contact
+/*
+ * Copyright (c) 2018. Minjae Son
+ */
+
+package com.tistory.s1s1s1.inu_contact.Activity
 
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -10,10 +14,11 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.tistory.s1s1s1.inu_contact.Network.GPS
+import com.tistory.s1s1s1.inu_contact.R
+import com.tistory.s1s1s1.inu_contact.Util.Singleton
 import net.daum.mf.map.api.MapPOIItem
 import net.daum.mf.map.api.MapPoint
-import net.daum.mf.map.api.MapView
-
+import net.daum.mf.map.api.MapViewrh
 
 class MapActivity : AppCompatActivity() {
 
@@ -39,10 +44,7 @@ class MapActivity : AppCompatActivity() {
         val mapViewContainer = findViewById<ViewGroup>(R.id.map_view)
         mapViewContainer.addView(mapView)
         mapView.setMapViewEventListener(eventListener)
-
-
         mapView.setZoomLevel(9, false)
-
 
         Singleton.markerJson.forEachIndexed { it, json ->
             val num = if(it < 9) "0${it+1}" else "${it+1}"
@@ -58,11 +60,11 @@ class MapActivity : AppCompatActivity() {
                             marker.customImageBitmap = resource
                             marker.mapPoint = MapPoint.mapPointWithGeoCoord(json.asJsonObject.get("lat").asDouble, json.asJsonObject.get("log").asDouble)
                             defaultMaker.add(marker)
-//                            mapView.addPOIItem(marker)
+                            mapView.addPOIItem(marker)
                         }
                     })
         }
-//        isDefaultMakerShowing = true
+        isDefaultMakerShowing = true
 
         // 학교 중앙 좌표 37.37545394897461 126.63258361816406
         getMyLocation()!!.run {
@@ -112,7 +114,7 @@ class MapActivity : AppCompatActivity() {
         }
 
         override fun onMapViewZoomLevelChanged(p0: MapView?, p1: Int) {
-            Log.d(TAG, "$p1")
+            Log.d(com.tistory.s1s1s1.inu_contact.TAG, "$p1")
         }
 
         override fun onMapViewLongPressed(p0: MapView?, p1: MapPoint?) {

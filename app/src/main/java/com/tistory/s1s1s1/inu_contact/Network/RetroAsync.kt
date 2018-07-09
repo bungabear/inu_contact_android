@@ -4,8 +4,8 @@ import android.os.AsyncTask
 import android.support.v7.widget.DefaultItemAnimator
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import com.tistory.s1s1s1.inu_contact.DBHelper
-import com.tistory.s1s1s1.inu_contact.MainActivity.*
+import com.tistory.s1s1s1.inu_contact.Util.DBHelper
+import com.tistory.s1s1s1.inu_contact.Activity.MainActivity.*
 import com.tistory.s1s1s1.inu_contact.Progress.MyProgress
 import com.tistory.s1s1s1.inu_contact.R
 import com.tistory.s1s1s1.inu_contact.RecyclerView.ContactAdapter

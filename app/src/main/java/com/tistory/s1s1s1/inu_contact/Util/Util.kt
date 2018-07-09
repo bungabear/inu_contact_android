@@ -1,7 +1,12 @@
-package com.tistory.s1s1s1.inu_contact
+/*
+ * Copyright (c) 2018. Minjae Son
+ */
+
+package com.tistory.s1s1s1.inu_contact.Util
 
 import android.content.Context
 import android.view.inputmethod.InputMethodManager
+import com.tistory.s1s1s1.inu_contact.Activity.MainActivity
 
 object Util{
     private val imm = MainActivity.mContext.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager

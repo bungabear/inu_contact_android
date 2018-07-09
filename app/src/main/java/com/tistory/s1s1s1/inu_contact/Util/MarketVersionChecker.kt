@@ -1,4 +1,4 @@
-package com.tistory.s1s1s1.inu_contact
+package com.tistory.s1s1s1.inu_contact.Util
 
 import org.jsoup.Jsoup
 import java.io.IOException

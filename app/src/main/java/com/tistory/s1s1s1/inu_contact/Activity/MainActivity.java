@@ -1,4 +1,8 @@
-package com.tistory.s1s1s1.inu_contact;
+/*
+ * Copyright (c) 2018. Minjae Son
+ */
+
+package com.tistory.s1s1s1.inu_contact.Activity;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -33,9 +37,15 @@ import android.widget.Toast;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.tistory.s1s1s1.inu_contact.BackPressCloseHandler;
+import com.tistory.s1s1s1.inu_contact.Contact;
 import com.tistory.s1s1s1.inu_contact.Network.RetroAsync;
 import com.tistory.s1s1s1.inu_contact.Progress.MyProgress;
+import com.tistory.s1s1s1.inu_contact.R;
 import com.tistory.s1s1s1.inu_contact.RecyclerView.ContactAdapter;
+import com.tistory.s1s1s1.inu_contact.Util.DBHelper;
+import com.tistory.s1s1s1.inu_contact.Util.MarketVersionChecker;
+import com.tistory.s1s1s1.inu_contact.Util.Singleton;
 
 import java.util.ArrayList;
 
