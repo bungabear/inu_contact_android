@@ -2,4 +2,5 @@
     <string name="app_name">인천대학교 전화번호부</string>
     <string name="no_internet">인터넷에 연결되어있지 않습니다.\n연결을 확인해주세요.</string>
     <string name="map_key">55ddadf086581e729926216671bcca73</string>
+    <string name="empty"> </string>
 </resources>

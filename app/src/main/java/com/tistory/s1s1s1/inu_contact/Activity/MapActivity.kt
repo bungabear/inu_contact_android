@@ -18,7 +18,7 @@ import com.tistory.s1s1s1.inu_contact.R
 import com.tistory.s1s1s1.inu_contact.Util.Singleton
 import net.daum.mf.map.api.MapPOIItem
 import net.daum.mf.map.api.MapPoint
-import net.daum.mf.map.api.MapViewrh
+import net.daum.mf.map.api.MapView
 
 class MapActivity : AppCompatActivity() {
 
@@ -104,7 +104,7 @@ class MapActivity : AppCompatActivity() {
         }
 
         override fun onMapViewCenterPointMoved(p0: MapView?, p1: MapPoint?) {
-//            Log.d(TAG, "${p1!!.mapPointGeoCoord.latitude} ${p1!!.mapPointGeoCoord.longitude}" )
+//            Log.d(LOG_TAG, "${p1!!.mapPointGeoCoord.latitude} ${p1!!.mapPointGeoCoord.longitude}" )
         }
 
         override fun onMapViewDragEnded(p0: MapView?, p1: MapPoint?) {
@@ -114,7 +114,7 @@ class MapActivity : AppCompatActivity() {
         }
 
         override fun onMapViewZoomLevelChanged(p0: MapView?, p1: Int) {
-            Log.d(com.tistory.s1s1s1.inu_contact.TAG, "$p1")
+            Log.d(com.tistory.s1s1s1.inu_contact.LOG_TAG, "$p1")
         }
 
         override fun onMapViewLongPressed(p0: MapView?, p1: MapPoint?) {

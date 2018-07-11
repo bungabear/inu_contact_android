@@ -1,5 +1,6 @@
 package com.tistory.s1s1s1.inu_contact.Progress
 
+import android.animation.Animator
 import android.content.Context
 import android.support.constraint.ConstraintLayout
 import android.view.Gravity
@@ -32,6 +33,7 @@ class MyProgress(context : Context, str : String = "로딩중..."){
             popup.dismiss()
         }
     }
+
 
     fun isShowing() = isShowing
 }

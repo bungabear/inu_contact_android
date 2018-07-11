@@ -11,31 +11,19 @@ import com.google.gson.JsonObject
 import com.tistory.s1s1s1.inu_contact.Contact
 import java.util.*
 
-class DBHelper private constructor(context: Context, version: Int) : SQLiteOpenHelper(context, "contact.db", null, version) {
-
+class DBHelper private constructor(val context: Context, val version: Int) : SQLiteOpenHelper(context, "contact.db", null, version) {
     companion object {
-
-        @Volatile
-        private var instance: DBHelper? = null
-        private var writable: SQLiteDatabase? = null
-        private var readable: SQLiteDatabase? = null
-        private val TABLE_ID = "CONTACT"
-        //
-        //    public DBHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version){
-        //        super(context, name, factory, version);
-        //    }
-
-        fun getInstance(context: Context, version: Int): DBHelper? {
-            if (instance == null) {
-                synchronized(DBHelper::class.java) {
-                    if (instance == null) {
-                        instance = DBHelper(context, version)
-                    }
-                }
-            }
-            return instance
+        var instance : DBHelper? = null
+        fun getInstance(context : Context, version : Int) : DBHelper{
+            val ret = instance ?: DBHelper(context, version)
+            instance = ret
+            return ret
         }
     }
+
+    val writable: SQLiteDatabase = this.writableDatabase
+    val readable: SQLiteDatabase = this.readableDatabase
+    val TABLE_ID = "CONTACT"
 
     val dbCount: Int
         get() {
@@ -58,11 +46,6 @@ class DBHelper private constructor(context: Context, version: Int) : SQLiteOpenH
             cursor.close()
             return parts
         }
-
-    init {
-        writable = this.writableDatabase
-        readable = this.readableDatabase
-    }
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL("CREATE TABLE $TABLE_ID(_id INTEGER PRIMARY KEY AUTOINCREMENT, part TEXT, dpart TEXT, position TEXT, name TEXT, task TEXT, phone TEXT, email TEXT, favorite INTEGER);")
