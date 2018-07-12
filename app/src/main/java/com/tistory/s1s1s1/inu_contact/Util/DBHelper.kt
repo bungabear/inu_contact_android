@@ -8,7 +8,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.google.gson.JsonObject
-import com.tistory.s1s1s1.inu_contact.Contact
+import com.tistory.s1s1s1.inu_contact.Model.Contact
 import java.util.*
 
 class DBHelper private constructor(val context: Context, val version: Int) : SQLiteOpenHelper(context, "contact.db", null, version) {
@@ -120,7 +120,7 @@ class DBHelper private constructor(val context: Context, val version: Int) : SQL
 
     @JvmOverloads
     fun searchContact(person: String, part :String = ""): ArrayList<Contact> {
-        //부서 내부에서 검색할때
+        //부서 내부에서 검색할때 part 사용.
         val query = if(part == "") "SELECT * FROM CONTACT WHERE NAME LIKE'%$person%'" else "SELECT * FROM CONTACT WHERE PART='$part' AND NAME LIKE'%$person%'"
         val cursor = readable!!.rawQuery(query, null)
         val contacts = ArrayList<Contact>()

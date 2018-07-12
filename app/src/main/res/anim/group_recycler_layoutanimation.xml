@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2018. Minjae Son
+  -->
+
+<layoutAnimation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:animation="@anim/contact_recycler_item_add"
+    android:delay="45%"
+    android:animationOrder="normal"
+    />

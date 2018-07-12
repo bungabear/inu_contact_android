@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?android:attr/actionBarSize"
-        layout="@layout/main_actionbar"
+        layout="@layout/custom_actionbar"
         android:id="@+id/main_actionbar"/>
 
     <FrameLayout

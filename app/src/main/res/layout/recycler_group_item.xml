@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+        <data>
+                <variable
+                    name="listener"
+                    type="com.tistory.s1s1s1.inu_contact.RecyclerView.ContactAdapter.GroupViewHolder"/>
+                <variable
+                    name="item"
+                    type="com.tistory.s1s1s1.inu_contact.Model.Contact"/>
+        </data>
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/custom_ripple"
+            android:id="@+id/group_item_parent"
+            >
+
+                <TextView
+                    android:id="@+id/group_item_tv_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginStart="20dp"
+                    android:textSize="20sp"
+                    android:fontFamily="@font/nanumgothicbold"
+                    android:gravity="center_vertical"
+                    android:text="@{item.part}"
+                    android:onClick="@{(v) -> listener.onItemClick(v, item)}"
+                    android:hint="Group Name Here"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+        </android.support.constraint.ConstraintLayout>
+</layout>

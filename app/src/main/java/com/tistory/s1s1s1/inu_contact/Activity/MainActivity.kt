@@ -4,75 +4,81 @@
 
 package com.tistory.s1s1s1.inu_contact.Activity
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v7.app.AppCompatActivity
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import android.widget.TextView
 import com.tistory.s1s1s1.inu_contact.Fragment.GroupFragment
 import com.tistory.s1s1s1.inu_contact.LOG_TAG
 import com.tistory.s1s1s1.inu_contact.R
+import com.tistory.s1s1s1.inu_contact.RecyclerView.ContactAdapter
 import com.tistory.s1s1s1.inu_contact.Util.DBHelper
 import com.tistory.s1s1s1.inu_contact.Util.Singleton
-import kotlinx.android.synthetic.main.main_actionbar.*
+import com.tistory.s1s1s1.inu_contact.Util.Util
+import kotlinx.android.synthetic.main.custom_actionbar.*
+
 
 //import com.gun0912.tedpermission.PermissionListener;
 //import com.gun0912.tedpermission.TedPermission;
 
 class MainActivity : AppCompatActivity() {
 
-    val mContext : Context = this
+    companion object {
 
-    val groupFragment : Fragment = GroupFragment()
-    val fm : FragmentManager = supportFragmentManager
-//    val imm = application.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        lateinit var actionBarTextView: TextView
+        lateinit var actionBarSearchView: EditText
+        lateinit var mFragmentManager : FragmentManager
+        lateinit var currentFragment : GroupFragment
+        fun setCurrentFragment(fragment : GroupFragment, tag :String = ""){
+            currentFragment = fragment
+            val fragmentTransaction = mFragmentManager.beginTransaction()
+            fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.slide_in_left, android.R.anim.slide_out_right )
+            fragmentTransaction.replace(R.id.main_fragment, fragment, tag)
+            if(mFragmentManager.fragments.size > 0) fragmentTransaction.addToBackStack(null)
+            fragmentTransaction.commit()
+
+        }
+    }
+
+    private var groupFragment : GroupFragment? = null
+    private var dbHelper : DBHelper? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        DBHelper.getInstance(this,Singleton.DB_VERSION)
+        mFragmentManager = supportFragmentManager
+        actionBarTextView = actionbar_tv_title
+        actionBarSearchView = actionbar_et_search
+        dbHelper = DBHelper.getInstance(this,Singleton.DB_VERSION)
+
         actionbar_et_search.setOnEditorActionListener(TextView.OnEditorActionListener { textView, i, keyEvent ->
             if (i == EditorInfo.IME_ACTION_SEARCH) {
-//                imm.hideSoftInputFromWindow(actionbar_et_search.windowToken, 0)
+                Util.hideKeyboard(this)
                 return@OnEditorActionListener true
             }
             false
         })
 
-//        actionbar_et_search.addTextChangedListener(mTextWatcher)
+        actionbar_et_search.addTextChangedListener(mTextWatcher)
         actionbar_iv_refresh.setOnClickListener(mClickListener)
         actionbar_iv_search.setOnClickListener(mClickListener)
         actionbar_iv_info.setOnClickListener(mClickListener)
         actionbar_iv_map.setOnClickListener(mClickListener)
 
-        val fragmentTransaction = fm.beginTransaction()
-        fragmentTransaction.replace(R.id.main_fragment, groupFragment)
-        fragmentTransaction.commit()
-
-//        fm
-//                .beginTransaction()
-//                .hide(mImageViewerFragment)
-//                .show( mTextViewerFragment )
-//                .addToBackStack("TEXT_VIEWER_BACKSTACK")
-//                .commit();
-
-
-
-
+        groupFragment = GroupFragment.newInstance { dbHelper!!.part }
+        setCurrentFragment(groupFragment!!, "Groups")
     }
 
     private var mClickListener = View.OnClickListener { v ->
         val id = v.id
-//        imm!!.hideSoftInputFromWindow(actionbar_et_search.windowToken, 0)
-        if (actionbar_et_search.isFocused) {
-            actionbar_et_search.clearFocus()
-        }
-
+        Util.hideKeyboard(this)
         when (id) {
 //            R.id.actionbar_iv_refresh -> {
 //                val dialog = AlertDialog.Builder(v.context).create()
@@ -101,97 +107,35 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onBackPressed() {
-        Log.d(LOG_TAG, "backstack count "+fm.backStackEntryCount)
-//        super.onBackPressed()
+    var mTextWatcher: TextWatcher = object : TextWatcher {
+        override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {  }
+        override fun onTextChanged(charSequence: CharSequence, start: Int, end1: Int, count: Int) {
+            val keyword = actionbar_et_search.text.toString()
+            Log.d(LOG_TAG, keyword)
+            (currentFragment.mRV!!.adapter as ContactAdapter).filter.filter(keyword)
+        }
+        override fun afterTextChanged(editable: Editable) {  }
     }
-    //    private val context = this
-//
-//    private var bpch: BackPressCloseHandler? = null
-//
-//    private var actionbar_iv_refresh: ImageView? = null
-//    private var actionbar_iv_search: ImageView? = null
-//    private var actionbar_iv_info: ImageView? = null
-//    private var actionbar_iv_map: ImageView? = null
-//
-//
-//    private var singleton: Singleton? = null
-//    private var issearch = false
-//    private var result: JsonArray? = null
-//    private val xProgressDialog: MyProgress? = null
-//
-//    private var imm: InputMethodManager? = null
-//
-//    internal var mTextWatcher: TextWatcher = object : TextWatcher {
-//        //검색 edittext
-//        override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
-//
-//        }
-//        override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
-//            actionbar_tv_title.text = "검색"
-//            val keyword = actionbar_et_search.text.toString()
-//            if (keyword != "") {
-//                issearch = true
-//                if (rv_level == 0) {
-//                    main_rv.removeAllViews()
-//                    val parts = dbHelper!!.searchPart(keyword)
-//                    val contacts = dbHelper!!.searchContact(keyword)
-//                    val num = dbHelper!!.searchNumber(keyword)
-//                    parts.addAll(contacts)
-//                    parts.addAll(num)
-//                    val contactAdapter = ContactAdapter(parts)
-//                    main_rv.adapter = contactAdapter
-//                } else {
-//                    main_rv.removeAllViews()
-//                    var part = singleton!!.CURRENT_PART
-//                    val contacts = dbHelper!!.searchContact(keyword, part)
-//                    val num = dbHelper!!.searchNumber(keyword, part)
-//                    contacts.addAll(num)
-//                    val contactAdapter = ContactAdapter(contacts)
-//                    main_rv.adapter = contactAdapter
-//                    if (part.length >= 9) {
-//                        part = part.substring(0, 8) + "..."
-//                    }
-//                }
-//            } else {
-//                //키워드가 공백일 때
-//                if (issearch) {
-//                    if (rv_level == 0) {
-//                        main_rv.removeAllViews()
-//                        val parts = dbHelper!!.part
-//                        val contactAdapter = ContactAdapter(parts)
-//                        main_rv.adapter = contactAdapter
-//                        //                        rv_level = 0;
-//                        issearch = false
-//                        actionbar_tv_title.setText(R.string.app_name)
-//                    } else {
-//                        main_rv.removeAllViews()
-//                        val part = singleton!!.CURRENT_PART
-//                        val contacts = dbHelper!!.getContact(part)
-//                        val contactAdapter = ContactAdapter(contacts)
-//                        main_rv.adapter = contactAdapter
-//                        //                        rv_level = 0;
-//                        issearch = false
-//                        actionbar_tv_title.text = part
-//                    }
-//                }
-//
-//
-//            }
-//        }
-//
-//        override fun afterTextChanged(editable: Editable) {
-//
-//        }
-//    }
-//
-//    internal var mClickListener = View.OnClickListener { v ->
-//        val id = v.id
-//        imm!!.hideSoftInputFromWindow(MainActivity.actionbar_et_search.windowToken, 0)
-//        if (MainActivity.actionbar_et_search.isFocused) {
-//            MainActivity.actionbar_et_search.clearFocus()
-//        }
-//
+
+    override fun onBackPressed() {
+        // 검색중이면 검색을 먼저 취소하고, 그 이후 Stack Pop
+        if(actionbar_et_search.text.toString() != ""){
+            actionbar_et_search.setText("")
+            (currentFragment.mRV!!.adapter as ContactAdapter).filter.filter("")
+        }
+        else if(mFragmentManager.backStackEntryCount > 0){
+            mFragmentManager.popBackStack()
+            currentFragment = mFragmentManager.findFragmentById(R.id.main_fragment) as GroupFragment
+        }
+        else {
+            super.onBackPressed()
+        }
+    }
+
+    fun setTitle(title : String){
+        actionbar_tv_title.text = title
+    }
+
 //        when (id) {
 //            R.id.actionbar_iv_refresh -> {
 //                val dialog = AlertDialog.Builder(v.context).create()
@@ -220,54 +164,17 @@ class MainActivity : AppCompatActivity() {
 //        }
 //    }
 
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        setContentView(R.layout.activity_main)
-//        main_fragment
-//        //        mContext = getApplication();
-//        mContext = context
-//
-//        if (imm == null) imm = application.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-//
-//        actionbar_tv_title = findViewById<View>(R.id.actionbar_tv_title) as TextView
-//        val tf = Typeface.createFromAsset(assets, "NanumGothicBold.ttf")
-//        actionbar_tv_title.typeface = tf
-//        actionbar_iv_refresh = findViewById<View>(R.id.actionbar_iv_refresh) as ImageView
-//        actionbar_iv_refresh!!.setOnClickListener(mClickListener)
-//        actionbar_et_search = findViewById<View>(R.id.actionbar_et_search) as EditText
-//        actionbar_et_search.setOnEditorActionListener(TextView.OnEditorActionListener { textView, i, keyEvent ->
-//            if (i == EditorInfo.IME_ACTION_SEARCH) {
-//                imm!!.hideSoftInputFromWindow(MainActivity.actionbar_et_search.windowToken, 0)
-//                return@OnEditorActionListener true
-//            }
-//            false
-//        })
-//        actionbar_et_search.addTextChangedListener(mTextWatcher)
-//        actionbar_iv_search = findViewById<View>(R.id.actionbar_iv_search) as ImageView
-//        actionbar_iv_search!!.setOnClickListener(mClickListener)
-//        actionbar_iv_info = findViewById<View>(R.id.actionbar_iv_info) as ImageView
-//        actionbar_iv_info!!.setOnClickListener(mClickListener)
-//        actionbar_iv_map = findViewById(R.id.actionbar_iv_map)
-//        actionbar_iv_map!!.setOnClickListener(mClickListener)
-//
-//        main_rv = findViewById<View>(R.id.main_rv) as RecyclerView
-//        main_rv.layoutManager = LinearLayoutManager(this)
-//        main_rv.addItemDecoration(DividerItemDecoration(context, LinearLayoutManager.VERTICAL))
-//
-//        bpch = BackPressCloseHandler(this)
-//
-//
-//        //        PermissionListener permissionListener = new PermissionListener() {
-//        //            @Override
-//        //            public void onPermissionGranted() {
-//        ////                Toast.makeText(mContext, "권한 요청이 허가되었습니다.", Toast.LENGTH_SHORT).show();
-//        //            }
-//        //
-//        //            @Override
-//        //            public void onPermissionDenied(ArrayList<String> deniedPermissions) {
-//        ////                Toast.makeText(mContext, "권한 요청이 거부되었습니다.", Toast.LENGTH_SHORT).show();
-//        //            }
-//        //        };
+    //        PermissionListener permissionListener = new PermissionListener() {
+    //            @Override
+    //            public void onPermissionGranted() {
+    ////                Toast.makeText(mContext, "권한 요청이 허가되었습니다.", Toast.LENGTH_SHORT).show();
+    //            }
+    //
+    //            @Override
+    //            public void onPermissionDenied(ArrayList<String> deniedPermissions) {
+    ////                Toast.makeText(mContext, "권한 요청이 거부되었습니다.", Toast.LENGTH_SHORT).show();
+    //            }
+    //        };
 //
 //        if (networkCheck()!! == false) {
 //            val dialog = AlertDialog.Builder(this).create()
@@ -295,14 +202,6 @@ class MainActivity : AppCompatActivity() {
 //            getDB()
 //
 //        }
-//    }
-//
-//    override fun onResume() {
-//        super.onResume()
-//        //        if(!versionCheked && networkCheck()){
-//        //            versionCheked = true;
-//        //            new VerCheck().execute();
-//        //        }
 //    }
 //
 //    private inner class VerCheck : AsyncTask<Void, Void, Void>() {
@@ -368,93 +267,6 @@ class MainActivity : AppCompatActivity() {
 //        }
 //    }
 //
-//    private fun getDB() {
-//        if (xProgressDialog != null && !xProgressDialog.isShowing()) xProgressDialog.show()
-//
-//        singleton!!.retrofitService.contact().enqueue(object : Callback<JsonElement> {
-//            override fun onResponse(call: Call<JsonElement>, response: Response<JsonElement>) {
-//                //                progressDialog.dismiss();
-//                Log.d("LOG_TAG", "RETROFIT SUCCESSED")
-//                dbHelper!!.delete()
-//                //                Log.d("LOG_TAG", response.toString());
-//                result = response.body()!!.asJsonArray
-//                //                Log.d("LOG_TAG", dbHelper.toString());
-//                val retroAsync = RetroAsync(xProgressDialog, result!!, dbHelper!!)
-//                retroAsync.execute()
-//                Log.d("LOG_TAG", "Success, count: " + dbHelper!!.dbCount)
-//            }
-//
-//            override fun onFailure(call: Call<JsonElement>, t: Throwable) {
-//                Log.d("LOG_TAG", "RETROFIT FAILED")
-//                xProgressDialog!!.dismiss()
-//                Toast.makeText(context, "데이터 업데이트에 실패하였습니다.\n새로고침을 눌러주세요.", Toast.LENGTH_SHORT).show()
-//            }
-//        })
-//    }
-//
-//    override fun onBackPressed() {
-//        //        if(actionbar_et_search.isFocused()) actionbar_et_search.clearFocus();
-//        //
-//        //        if (issearch == true) {
-//        //            ArrayList<Contact> contacts = dbHelper.getPart();
-//        //            ContactAdapter contactAdapter = new ContactAdapter(this, contacts);
-//        //            MainActivity.main_rv.setAdapter(contactAdapter);
-//        //            MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
-//        //            MainActivity.actionbar_tv_title.setText(R.string.app_name);
-//        //            MainActivity.rv_level = 0;
-//        //            MainActivity.actionbar_et_search.setText("");
-//        //            actionbar_tv_title.setText(R.string.app_name);
-//        //            issearch = false;
-//        //        } else if (MainActivity.rv_level == 1) {
-//        //            MainActivity.main_rv.removeAllViews();
-//        //            ArrayList<Contact> contacts = dbHelper.getPart();
-//        //            ContactAdapter contactAdapter = new ContactAdapter(this, contacts);
-//        //            MainActivity.main_rv.setAdapter(contactAdapter);
-//        //            MainActivity.main_rv.setItemAnimator(new DefaultItemAnimator());
-//        //            MainActivity.actionbar_tv_title.setText(R.string.app_name);
-//        //            MainActivity.rv_level = 0;
-//        ////            if (MainActivity.actionbar_et_search.isFocused()) {
-//        ////                MainActivity.actionbar_et_search.clearFocus();
-//        ////            }
-//        //        } else bpch.onBackPressed();
-//
-//        val contactAdapter: ContactAdapter
-//        if (issearch) {
-//            //검색모드
-//            main_rv.removeAllViews()
-//            issearch = false
-//            if (actionbar_et_search.isFocused) actionbar_et_search.clearFocus()
-//            actionbar_et_search.setText("")
-//            when (rv_level) {
-//                0 -> {
-//                    contactAdapter = ContactAdapter(dbHelper!!.part)
-//                    actionbar_tv_title.setText(R.string.app_name)
-//                }
-//                1 -> {
-//                    val part = singleton!!.CURRENT_PART
-//                    contactAdapter = ContactAdapter(dbHelper!!.getContact(part))
-//                    actionbar_tv_title.text = part
-//                }
-//                else -> contactAdapter = ContactAdapter(null!!)
-//            }
-//            main_rv.adapter = contactAdapter
-//        } else if (actionbar_et_search.isFocused) {
-//            actionbar_et_search.clearFocus()
-//        } else {
-//            when (rv_level) {
-//                0 -> bpch!!.onBackPressed()
-//                1 -> {
-//                    main_rv.removeAllViews()
-//                    contactAdapter = ContactAdapter(dbHelper!!.part)
-//                    actionbar_tv_title.setText(R.string.app_name)
-//                    rv_level = 0
-//                    main_rv.adapter = contactAdapter
-//                }
-//            }
-//        }
-//
-//    }
-//
 //    fun networkCheck(): Boolean? {
 //        val manager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 //        val phone = manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE)
@@ -480,4 +292,6 @@ class MainActivity : AppCompatActivity() {
 //        var actionbar_tv_title: TextView
 //        var actionbar_et_search: EditText
 //    }
+
+
 }

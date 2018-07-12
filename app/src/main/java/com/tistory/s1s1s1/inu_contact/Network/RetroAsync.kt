@@ -32,10 +32,10 @@ class RetroAsync
 
     override fun onPostExecute(aVoid: Unit?) {
         if(fragment is GroupFragment){
-            Log.d(LOG_TAG, "DB 입력 종료" + dbHelper.part.toString())
-            fragment.mRV.adapter = ContactAdapter(dbHelper.part)
+//            Log.d(LOG_TAG, "DB 입력 종료" + dbHelper.part.toString())
+            fragment.mRV!!.adapter = ContactAdapter(dbHelper.part)
 //            actionbar_tv_title.setText(R.string.app_name)
-            fragment.mRV.adapter.notifyDataSetChanged()
+            fragment.mRV!!.adapter.notifyDataSetChanged()
 
 //            if (actionbar_et_search.isFocused) {
 //                actionbar_et_search.clearFocus()
