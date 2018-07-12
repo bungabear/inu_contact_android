@@ -75,7 +75,6 @@
             android:imeOptions="actionSearch"
             android:lines="1"
             android:singleLine="true"
-            android:inputType="textFilter|textNoSuggestions"
             android:id="@+id/actionbar_et_search"
             android:textSize="16sp"/>
 

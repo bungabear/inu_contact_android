@@ -9,27 +9,26 @@ import android.net.Uri
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Filter
 import android.widget.Filterable
 import com.tistory.s1s1s1.inu_contact.Activity.MainActivity
-import com.tistory.s1s1s1.inu_contact.Fragment.GroupFragment
-import com.tistory.s1s1s1.inu_contact.LOG_TAG
-import com.tistory.s1s1s1.inu_contact.Model.Contact
+import com.tistory.s1s1s1.inu_contact.Fragment.ContactFragment
+import com.tistory.s1s1s1.inu_contact.Model.RoomContact
 import com.tistory.s1s1s1.inu_contact.R
-import com.tistory.s1s1s1.inu_contact.Util.DBHelper
+import com.tistory.s1s1s1.inu_contact.Util.Util
 import com.tistory.s1s1s1.inu_contact.databinding.RecyclerContactItemBinding
 import com.tistory.s1s1s1.inu_contact.databinding.RecyclerGroupItemBinding
-import java.util.*
 
 
-class ContactAdapter(private val contacts: ArrayList<Contact>, private var filteredContacts : ArrayList<Contact> = contacts) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), Filterable {
+class ContactAdapter(private val contacts: ArrayList<RoomContact>, private var filteredContacts : ArrayList<RoomContact> = contacts) : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 
+    companion object {
+        private var allList = MainActivity.DB_Contacts.roomContactDAO().getAll()
+    }
 
-    enum class ViewHolderType(value : Int) { Contact(0), Group(1) }
+    enum class ViewHolderType { Contact, Group }
 
     override fun getItemViewType(position: Int): Int {
         return if(filteredContacts[position].dpart=="" && filteredContacts[position].name =="") ViewHolderType.Group.ordinal else ViewHolderType.Contact.ordinal
@@ -42,7 +41,6 @@ class ContactAdapter(private val contacts: ArrayList<Contact>, private var filte
             ViewHolderType.Contact-> {
                 val binding = RecyclerContactItemBinding.inflate(inflater, parent, false)
                 ContactViewHolder(binding)
-
             }
             ViewHolderType.Group-> {
                 val binding = RecyclerGroupItemBinding.inflate(inflater, parent, false)
@@ -56,7 +54,7 @@ class ContactAdapter(private val contacts: ArrayList<Contact>, private var filte
         val item = filteredContacts[position]
         when (type) {
             ViewHolderType.Contact -> {
-                (holder as ContactViewHolder).binding.item = item
+                (holder as ContactViewHolder).set(item)
             }
             ViewHolderType.Group -> {
                 (holder as GroupViewHolder).set(item)
@@ -64,9 +62,9 @@ class ContactAdapter(private val contacts: ArrayList<Contact>, private var filte
         }
     }
 
-    inner class ContactViewHolder(val binding: RecyclerContactItemBinding) : RecyclerView.ViewHolder(binding.root){
-        fun onItemClick(v : View, item : Contact){
-//            Util.hideKeyboard()
+    inner class ContactViewHolder(private val binding: RecyclerContactItemBinding) : RecyclerView.ViewHolder(binding.root){
+        fun onItemClick(v : View, item : RoomContact){
+            Util.hideKeyboard(MainActivity.searchBar!!)
             val context = v.context
             val dialog = AlertDialog.Builder(context)
             dialog.setTitle("전화걸기").setMessage("${item.part} / ${item.name} (${item.phone})로 전화를 거시겠습니까?").setIcon(R.drawable.ic_call)
@@ -75,13 +73,13 @@ class ContactAdapter(private val contacts: ArrayList<Contact>, private var filte
 
                         if (permissionCheck == PackageManager.PERMISSION_DENIED) {
                             //권한 없음
-                            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + item.phone))
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            try {
-                                context.startActivity(intent)
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
+//                            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + item.phone))
+//                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                            try {
+//                                context.startActivity(intent)
+//                            } catch (e: Exception) {
+//                                e.printStackTrace()
+//                            }
 
                         } else {
                             //권한 있음
@@ -96,39 +94,41 @@ class ContactAdapter(private val contacts: ArrayList<Contact>, private var filte
                         }
                     }.setNegativeButton("아니오") { diag, _ -> diag.dismiss() }
             val alert = dialog.create()
+            alert.getButton(DialogInterface.BUTTON_NEGATIVE)
+                    .setTextColor(Color.BLACK)
+            alert.getButton(DialogInterface.BUTTON_POSITIVE)
+                    .setTextColor(Color.BLACK)
             alert.show()
-            val nbutton = alert.getButton(DialogInterface.BUTTON_NEGATIVE)
-            nbutton.setTextColor(Color.BLACK)
-            val pbutton = alert.getButton(DialogInterface.BUTTON_POSITIVE)
-            pbutton.setTextColor(Color.BLACK)
         }
 
-        fun set(item : Contact){
+        fun set(item : RoomContact){
             binding.item = item
             binding.listener = this
             binding.executePendingBindings()
         }
     }
 
-    inner class GroupViewHolder(val binding: RecyclerGroupItemBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class GroupViewHolder(private val binding: RecyclerGroupItemBinding) : RecyclerView.ViewHolder(binding.root) {
 
         @BindingAdapter("android:visibility")
         fun setVisibility(view: View, value: Boolean?) {
             view.visibility = if (binding.item!!.phone == "") View.VISIBLE else View.GONE
         }
 
-        fun set(item : Contact){
+        fun set(item : RoomContact){
             binding.item = item
             binding.listener = this
             binding.executePendingBindings()
         }
 
-        fun onItemClick(v : View, item : Contact){
-            Log.d(LOG_TAG, "clicked")
-            val newFragment = GroupFragment.newInstance(item.part){
-                DBHelper.instance!!.getContact(item.part)
+        fun onItemClick(v : View, item : RoomContact){
+            Util.hideKeyboard(MainActivity.searchBar!!)
+            val newFragment = ContactFragment.newInstance(item.part){
+                ArrayList(MainActivity.DB_Contacts.roomContactDAO().getContactInPart(item.part))
             }
-            MainActivity.setCurrentFragment(newFragment, "contacts")
+            val savedText = MainActivity.searchBar!!.text.toString()
+            MainActivity.searchBar!!.setText("")
+            MainActivity.setCurrentFragment(newFragment, savedText)
         }
     }
 
@@ -136,31 +136,37 @@ class ContactAdapter(private val contacts: ArrayList<Contact>, private var filte
         return filteredContacts.size
     }
 
-    override fun getFilter(): Filter {
-        return object : Filter(){
-            override fun performFiltering(constraint: CharSequence?): FilterResults {
-                val str = constraint.toString()
-                val result = FilterResults()
-                return if(str == ""){
-                    result.values = contacts
-                    result
+    fun filter(str : String, part : String = "") {
+        val filtered = ArrayList<RoomContact>()
+        filteredContacts =
+                // 검색 취소
+                if(str == ""){
+                    contacts
                 }
-                else {
-                    val filtered = ArrayList<Contact>()
+                // 부서 안에서 검색
+                else if(part != ""){
                     for (i in contacts) {
-                        if (i.name.contains(str.toLowerCase()) || i.phone.contains(str) || i.dpart.contains(str) || i.part.contains(str)) {
+                        if (i.name.toLowerCase().contains(str.toLowerCase()) || i.phone.contains(str) || i.dpart.contains(str) || i.part.contains(str) || i.position.contains(str)) {
                             filtered.add(i)
                         }
                     }
-                    result.values = filtered
-                    result
+                    filtered
                 }
-            }
-            override fun publishResults(constraint: CharSequence?, results: FilterResults) {
-                filteredContacts = results.values as ArrayList<Contact>
-                notifyDataSetChanged()
-            }
-
-        }
+                // 전체 검색
+                else {
+                    // 그룹 + 개인
+                    for (i in contacts) {
+                        if (i.part.contains(str)) {
+                            filtered.add(i)
+                        }
+                    }
+                    for (i in allList) {
+                        if (i.name.toLowerCase().contains(str.toLowerCase()) || i.phone.contains(str) || i.dpart.contains(str) || i.part.contains(str) || i.position.contains(str)) {
+                            filtered.add(i)
+                        }
+                    }
+                    filtered
+                }
+        notifyDataSetChanged()
     }
 }

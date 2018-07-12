@@ -24,8 +24,5 @@ class InfoActivity : AppCompatActivity() {
         }
 
         tvVer.text = pi!!.versionName
-
-//        val tf = Typeface.createFromAsset(assets, "NanumGothicBold.ttf")
-//        tvVer.typeface = tf
     }
 }

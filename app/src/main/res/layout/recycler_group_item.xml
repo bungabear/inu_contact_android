@@ -8,7 +8,7 @@
                     type="com.tistory.s1s1s1.inu_contact.RecyclerView.ContactAdapter.GroupViewHolder"/>
                 <variable
                     name="item"
-                    type="com.tistory.s1s1s1.inu_contact.Model.Contact"/>
+                    type="com.tistory.s1s1s1.inu_contact.Model.RoomContact"/>
         </data>
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"

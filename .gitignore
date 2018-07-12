@@ -5,6 +5,9 @@
 /.idea/libraries
 .DS_Store
 /build
+Config*
 /captures
 .externalNativeBuild
 /app/src/main/java/com/tistory/s1s1s1/inu_contact/ServerString.java
+.idea/caches/
+.idea/codeStyles/
