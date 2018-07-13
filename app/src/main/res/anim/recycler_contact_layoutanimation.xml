@@ -5,7 +5,7 @@
 
 <layoutAnimation
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:animation="@anim/contact_recycler_item_add"
+    android:animation="@anim/recycler_contact_item_add"
     android:delay="45%"
     android:animationOrder="normal"
     />

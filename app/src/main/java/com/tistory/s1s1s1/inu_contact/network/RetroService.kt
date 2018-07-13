@@ -1,4 +1,4 @@
-package com.tistory.s1s1s1.inu_contact.Network
+package com.tistory.s1s1s1.inu_contact.network
 
 import com.google.gson.JsonElement
 

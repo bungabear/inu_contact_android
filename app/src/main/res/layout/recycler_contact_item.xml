@@ -7,10 +7,10 @@
         <import type="android.view.View"/>
         <variable
             name="listener"
-            type="com.tistory.s1s1s1.inu_contact.RecyclerView.ContactAdapter.ContactViewHolder"/>
+            type="com.tistory.s1s1s1.inu_contact.adapter.ContactAdapter.ContactViewHolder"/>
         <variable
             name="item"
-            type="com.tistory.s1s1s1.inu_contact.Model.RoomContact"/>
+            type="com.tistory.s1s1s1.inu_contact.model.RoomContact"/>
     </data>
 
     <android.support.constraint.ConstraintLayout

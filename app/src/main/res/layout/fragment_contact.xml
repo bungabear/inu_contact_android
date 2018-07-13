@@ -8,14 +8,14 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.tistory.s1s1s1.inu_contact.Activity.MainActivity">
+    tools:context="com.tistory.s1s1s1.inu_contact.activity.MainActivity">
 
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/fragment_contact_rv"
         tools:listitem="@layout/recycler_contact_item"
-        android:layoutAnimation="@anim/contact_recycler_layoutanimation"
+        android:layoutAnimation="@anim/recycler_contact_layoutanimation"
         >
 
     </android.support.v7.widget.RecyclerView>

@@ -2,7 +2,7 @@
  * Copyright (c) 2018. Minjae Son
  */
 
-package com.tistory.s1s1s1.inu_contact.Fragment
+package com.tistory.s1s1s1.inu_contact.fragment
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -14,10 +14,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
-import com.tistory.s1s1s1.inu_contact.Activity.MainActivity
-import com.tistory.s1s1s1.inu_contact.Model.RoomContact
+import com.tistory.s1s1s1.inu_contact.activity.MainActivity
+import com.tistory.s1s1s1.inu_contact.model.RoomContact
 import com.tistory.s1s1s1.inu_contact.R
-import com.tistory.s1s1s1.inu_contact.RecyclerView.ContactAdapter
+import com.tistory.s1s1s1.inu_contact.adapter.ContactAdapter
 import kotlinx.android.synthetic.main.fragment_contact.view.*
 
 class ContactFragment : Fragment(){
@@ -55,7 +55,7 @@ class ContactFragment : Fragment(){
     }
 
     private fun reset(){
-        mRV!!.layoutAnimation = AnimationUtils.loadLayoutAnimation(context, R.anim.contact_recycler_layoutanimation)
+        mRV!!.layoutAnimation = AnimationUtils.loadLayoutAnimation(context, R.anim.recycler_contact_layoutanimation)
         if(callback != null){
             mRV!!.adapter = ContactAdapter(callback?.invoke()!!)
             mRV!!.adapter.notifyDataSetChanged()

@@ -2,7 +2,7 @@
  * Copyright (c) 2018. Minjae Son
  */
 
-package com.tistory.s1s1s1.inu_contact.Activity
+package com.tistory.s1s1s1.inu_contact.activity
 
 import android.arch.persistence.room.Room
 import android.content.Context
@@ -24,13 +24,13 @@ import android.widget.TextView
 import android.widget.Toast
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
-import com.tistory.s1s1s1.inu_contact.Fragment.ContactFragment
-import com.tistory.s1s1s1.inu_contact.Model.AppDatabase
-import com.tistory.s1s1s1.inu_contact.Model.RoomContact
+import com.tistory.s1s1s1.inu_contact.fragment.ContactFragment
+import com.tistory.s1s1s1.inu_contact.model.AppDatabase
+import com.tistory.s1s1s1.inu_contact.model.RoomContact
 import com.tistory.s1s1s1.inu_contact.R
-import com.tistory.s1s1s1.inu_contact.RecyclerView.ContactAdapter
-import com.tistory.s1s1s1.inu_contact.Util.Singleton
-import com.tistory.s1s1s1.inu_contact.Util.Util
+import com.tistory.s1s1s1.inu_contact.adapter.ContactAdapter
+import com.tistory.s1s1s1.inu_contact.util.Singleton
+import com.tistory.s1s1s1.inu_contact.util.Util
 import kotlinx.android.synthetic.main.custom_actionbar.*
 import retrofit2.Call
 import retrofit2.Callback

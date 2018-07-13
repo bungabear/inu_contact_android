@@ -1,4 +1,4 @@
-package com.tistory.s1s1s1.inu_contact.Model
+package com.tistory.s1s1s1.inu_contact.model
 
 import android.arch.persistence.room.Dao
 import android.arch.persistence.room.Insert

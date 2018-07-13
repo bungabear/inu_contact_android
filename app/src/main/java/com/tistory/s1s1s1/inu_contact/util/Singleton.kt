@@ -2,11 +2,11 @@
  * Copyright (c) 2018. Minjae Son
  */
 
-package com.tistory.s1s1s1.inu_contact.Util
+package com.tistory.s1s1s1.inu_contact.util
 
 import com.google.gson.JsonParser
 import com.tistory.s1s1s1.inu_contact.BASE_URL
-import com.tistory.s1s1s1.inu_contact.Network.RetroService
+import com.tistory.s1s1s1.inu_contact.network.RetroService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

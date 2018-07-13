@@ -2,7 +2,7 @@
  * Copyright (c) 2018. Minjae Son
  */
 
-package com.tistory.s1s1s1.inu_contact.Activity
+package com.tistory.s1s1s1.inu_contact.activity
 
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -13,9 +13,9 @@ import android.widget.Button
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
-import com.tistory.s1s1s1.inu_contact.Network.GPS
+import com.tistory.s1s1s1.inu_contact.network.GPS
 import com.tistory.s1s1s1.inu_contact.R
-import com.tistory.s1s1s1.inu_contact.Util.Singleton
+import com.tistory.s1s1s1.inu_contact.util.Singleton
 import net.daum.mf.map.api.MapPOIItem
 import net.daum.mf.map.api.MapPoint
 import net.daum.mf.map.api.MapView

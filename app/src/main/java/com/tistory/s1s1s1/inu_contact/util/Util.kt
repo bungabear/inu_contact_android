@@ -2,7 +2,7 @@
  * Copyright (c) 2018. Minjae Son
  */
 
-package com.tistory.s1s1s1.inu_contact.Util
+package com.tistory.s1s1s1.inu_contact.util
 
 import android.app.Activity
 import android.content.Context
